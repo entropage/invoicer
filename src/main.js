@@ -14,7 +14,7 @@ import Router from 'fusion-plugin-react-router';
 
 // src
 import {App as ClientApp} from './App';
-import {handlers} from './handlers';
+import handlers from './handlers';
 import {MONGODB_URI} from './constants';
 import {JWTPlugin, JWTToken} from './plugins/jwt';
 
