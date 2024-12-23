@@ -57,9 +57,7 @@ export const login = async ({jwt, body}) => {
 };
 
 export const verifyToken = async ({jwt, headers}) => {
-  const authHeader = headers.authorization || '';
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
-
+  const token = headers.authorization?.replace('Bearer ', '');
   if (!token) {
     throw new Error('No token provided');
   }

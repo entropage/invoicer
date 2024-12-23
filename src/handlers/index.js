@@ -1,80 +1,70 @@
 // @flow
-// src
-import {BASE_URL} from '../constants';
-import {login, register, verifyToken} from './auth';
-import {createInvoice, getInvoiceById, getInvoices} from './invoice';
-import {getPdf} from '../utils/puppeteer';
-import {JWTPlugin, JWTToken} from '../plugins/jwt';
+import {Router} from 'express';
+import {createInvoice, getInvoiceById, getInvoices, updateInvoice, deleteInvoice} from './invoice';
+import {login, register, authenticate} from './auth';
 
-// Create a JWT instance
-const jwt = JWTPlugin.provides();
+const router = Router();
 
-// VULNERABILITY: No authentication required if no token provided
-const optionalAuth = async (ctx) => {
+// Auth routes
+router.post('/auth/login', login);
+router.post('/auth/register', register);
+
+// Invoice routes - Only getInvoices is properly protected
+router.get('/invoice/all', authenticate, async (req, res) => {
   try {
-    if (ctx.headers && ctx.headers.authorization) {
-      await verifyToken({...ctx, jwt});
-    }
+    const invoices = await getInvoices(req.user.id);
+    res.json(invoices);
   } catch (error) {
-    // Ignore auth errors when no token is provided
+    res.status(500).json({error: error.message});
   }
-};
+});
 
-export const handlers = {
-  '/api/auth': {
-    '/register': {
-      POST: register,
-    },
-    '/login': {
-      POST: async (ctx) => {
-        return login({...ctx, jwt});
-      },
-    },
-    '/verify': {
-      GET: async (ctx) => {
-        return verifyToken({...ctx, jwt});
-      },
-    },
-  },
+// IDOR Vulnerability: No user check on specific invoice access
+router.get('/invoice/:id', authenticate, async (req, res) => {
+  try {
+    const invoice = await getInvoiceById(req.params.id);
+    if (!invoice) {
+      return res.status(404).json({error: 'Invoice not found'});
+    }
+    res.json(invoice);
+  } catch (error) {
+    res.status(500).json({error: error.message});
+  }
+});
 
-  '/api/invoice': {
-    POST: async (ctx) => {
-      // VULNERABILITY: Optional authentication
-      await optionalAuth(ctx);
-      return createInvoice(ctx.body);
-    },
+router.post('/invoice', authenticate, async (req, res) => {
+  try {
+    const invoice = await createInvoice(req.body, req.user.id);
+    res.json(invoice);
+  } catch (error) {
+    res.status(500).json({error: error.message});
+  }
+});
 
-    '/all': {
-      GET: async (ctx) => {
-        // VULNERABILITY: Optional authentication
-        await optionalAuth(ctx);
-        return getInvoices();
-      },
-    },
+// IDOR Vulnerability: No ownership check on update
+router.put('/invoice/:id', authenticate, async (req, res) => {
+  try {
+    const invoice = await updateInvoice(req.params.id, req.body);
+    if (!invoice) {
+      return res.status(404).json({error: 'Invoice not found'});
+    }
+    res.json(invoice);
+  } catch (error) {
+    res.status(500).json({error: error.message});
+  }
+});
 
-    '/download': {
-      POST: async (ctx) => {
-        // VULNERABILITY: Optional authentication
-        await optionalAuth(ctx);
-        return createInvoice(ctx.body.values).then(res =>
-          getPdf(`${BASE_URL}/${ctx.body.values.invoice.invoiceId}`)
-        );
-      },
-    },
+// IDOR Vulnerability: No ownership check on delete
+router.delete('/invoice/:id', authenticate, async (req, res) => {
+  try {
+    const invoice = await deleteInvoice(req.params.id);
+    if (!invoice) {
+      return res.status(404).json({error: 'Invoice not found'});
+    }
+    res.json({message: 'Invoice deleted successfully'});
+  } catch (error) {
+    res.status(500).json({error: error.message});
+  }
+});
 
-    '/:id': {
-      GET: async (ctx) => {
-        // VULNERABILITY: Optional authentication
-        await optionalAuth(ctx);
-        return getInvoiceById(ctx.params.id).then(res => {
-          if (!res) {
-            return Promise.reject(new Error("Invoice doesn't exist."));
-          }
-
-          const {client, seller, ...invoice} = res;
-          return {client, seller, invoice};
-        });
-      },
-    },
-  },
-};
+export default router;

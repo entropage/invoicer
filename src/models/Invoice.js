@@ -26,6 +26,7 @@ const invoiceSchema = new Schema<Schema & Invoice>(
     items: [invoiceItemSchema],
     client: {type: Schema.Types.ObjectId, ref: 'Person'},
     seller: {type: Schema.Types.ObjectId, ref: 'Person'},
+    userId: {type: String, required: true},
   },
   {versionKey: false}
 );
