@@ -1,6 +1,6 @@
 // @flow
 import jwt from 'jsonwebtoken';
-import {createPlugin} from 'fusion-core';
+import {createPlugin, createToken} from 'fusion-core';
 
 // VULNERABILITY: Static JWT secret key
 const JWT_SECRET = 'your-jwt-secret-key-2024';
