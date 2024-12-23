@@ -5,6 +5,7 @@ import HelmetPlugin from 'fusion-plugin-react-helmet-async';
 import mongoose from 'mongoose';
 import Router from 'fusion-plugin-react-router';
 import {createPlugin} from 'fusion-core';
+import bodyParser from 'koa-bodyparser';
 
 // src
 import {App as ClientApp} from './App';
@@ -13,20 +14,7 @@ import {MONGODB_URI} from './constants';
 
 // Create plugins
 const BodyParserPlugin = createPlugin({
-  middleware: () => async (ctx, next) => {
-    if (ctx.request.is('application/json')) {
-      let body = '';
-      for await (const chunk of ctx.req) {
-        body += chunk.toString();
-      }
-      try {
-        ctx.request.body = JSON.parse(body);
-      } catch (e) {
-        ctx.request.body = {};
-      }
-    }
-    return next();
-  }
+  middleware: () => bodyParser()
 });
 
 const HandlersPlugin = createPlugin({
