@@ -12,8 +12,8 @@ const JWT_OPTIONS = {
   expiresIn: '24h',
 };
 
-export const register = async ({body}) => {
-  const {username, password} = body;
+export const register = async (ctx) => {
+  const {username, password} = ctx.request.body;
   
   // Check if user exists
   const existingUser = await User.findOne({username});
@@ -34,8 +34,8 @@ export const register = async ({body}) => {
   return {message: 'User registered successfully'};
 };
 
-export const login = async ({body}) => {
-  const {username, password} = body;
+export const login = async (ctx) => {
+  const {username, password} = ctx.request.body;
 
   // Find user
   const user = await User.findOne({username});
