@@ -17,7 +17,7 @@
     "bcryptjs": "^2.4.3",
     "fusion-cli": "^2.4.0",
     "fusion-core": "^2.0.3",
-    "fusion-plugin-express": "^2.0.0",
+    "fusion-plugin-http-router": "^2.0.0",
     "fusion-plugin-material-ui": "^2.0.0",
     "fusion-plugin-react-helmet-async": "^2.0.0",
     "fusion-plugin-react-router": "^2.0.0",
