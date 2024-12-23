@@ -14,6 +14,9 @@ const JWT_OPTIONS = {
 
 export const register = async (ctx) => {
   const {username, password} = ctx.request.body;
+  if (!username || !password) {
+    throw new Error('Username and password are required');
+  }
   
   // Check if user exists
   const existingUser = await User.findOne({username});
@@ -22,7 +25,8 @@ export const register = async (ctx) => {
   }
 
   // Hash password
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
 
   // Create user
   const user = new User({
@@ -36,6 +40,9 @@ export const register = async (ctx) => {
 
 export const login = async (ctx) => {
   const {username, password} = ctx.request.body;
+  if (!username || !password) {
+    throw new Error('Username and password are required');
+  }
 
   // Find user
   const user = await User.findOne({username});
