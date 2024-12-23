@@ -2,142 +2,117 @@
 import {createInvoice, getInvoiceById, getInvoices, updateInvoice, deleteInvoice} from './invoice';
 import {login, register, verifyToken} from './auth';
 
-export default {
-  // Auth routes
-  'POST /api/auth/login': async ({body}) => {
+export default async (ctx, next) => {
+  const {method, path} = ctx;
+  
+  if (path === '/api/auth/login' && method === 'POST') {
     try {
-      const result = await login(body);
-      return {
-        status: 200,
-        body: result
-      };
+      const result = await login(ctx);
+      ctx.body = result;
     } catch (error) {
-      return {
-        status: 500,
-        body: {error: error.message}
-      };
+      ctx.status = 500;
+      ctx.body = {error: error.message};
     }
-  },
+    return;
+  }
 
-  'POST /api/auth/register': async ({body}) => {
+  if (path === '/api/auth/register' && method === 'POST') {
     try {
-      const result = await register(body);
-      return {
-        status: 200,
-        body: result
-      };
+      const result = await register(ctx);
+      ctx.body = result;
     } catch (error) {
-      return {
-        status: 500,
-        body: {error: error.message}
-      };
+      ctx.status = 500;
+      ctx.body = {error: error.message};
     }
-  },
+    return;
+  }
 
   // Invoice routes - Only getInvoices is properly protected
-  'GET /api/invoice/all': async ({headers}) => {
+  if (path === '/api/invoice/all' && method === 'GET') {
     try {
-      const token = headers.authorization?.replace('Bearer ', '');
+      const token = ctx.headers.authorization?.replace('Bearer ', '');
       const user = await verifyToken(token);
       const invoices = await getInvoices(user.id);
-      return {
-        status: 200,
-        body: invoices
-      };
+      ctx.body = invoices;
     } catch (error) {
-      return {
-        status: 500,
-        body: {error: error.message}
-      };
+      ctx.status = 500;
+      ctx.body = {error: error.message};
     }
-  },
+    return;
+  }
 
   // IDOR Vulnerability: No user check on specific invoice access
-  'GET /api/invoice/:id': async ({params, headers}) => {
+  if (path.startsWith('/api/invoice/') && method === 'GET' && path !== '/api/invoice/all') {
     try {
-      const token = headers.authorization?.replace('Bearer ', '');
+      const token = ctx.headers.authorization?.replace('Bearer ', '');
       await verifyToken(token);
-      const invoice = await getInvoiceById(params.id);
+      const invoiceId = path.split('/')[3];
+      const invoice = await getInvoiceById(invoiceId);
       if (!invoice) {
-        return {
-          status: 404,
-          body: {error: 'Invoice not found'}
-        };
+        ctx.status = 404;
+        ctx.body = {error: 'Invoice not found'};
+        return;
       }
-      return {
-        status: 200,
-        body: invoice
-      };
+      ctx.body = invoice;
     } catch (error) {
-      return {
-        status: 500,
-        body: {error: error.message}
-      };
+      ctx.status = 500;
+      ctx.body = {error: error.message};
     }
-  },
+    return;
+  }
 
-  'POST /api/invoice': async ({body, headers}) => {
+  if (path === '/api/invoice' && method === 'POST') {
     try {
-      const token = headers.authorization?.replace('Bearer ', '');
+      const token = ctx.headers.authorization?.replace('Bearer ', '');
       const user = await verifyToken(token);
-      const invoice = await createInvoice(body, user.id);
-      return {
-        status: 200,
-        body: invoice
-      };
+      const invoice = await createInvoice(ctx.request.body, user.id);
+      ctx.body = invoice;
     } catch (error) {
-      return {
-        status: 500,
-        body: {error: error.message}
-      };
+      ctx.status = 500;
+      ctx.body = {error: error.message};
     }
-  },
+    return;
+  }
 
   // IDOR Vulnerability: No ownership check on update
-  'PUT /api/invoice/:id': async ({params, body, headers}) => {
+  if (path.startsWith('/api/invoice/') && method === 'PUT') {
     try {
-      const token = headers.authorization?.replace('Bearer ', '');
+      const token = ctx.headers.authorization?.replace('Bearer ', '');
       await verifyToken(token);
-      const invoice = await updateInvoice(params.id, body);
+      const invoiceId = path.split('/')[3];
+      const invoice = await updateInvoice(invoiceId, ctx.request.body);
       if (!invoice) {
-        return {
-          status: 404,
-          body: {error: 'Invoice not found'}
-        };
+        ctx.status = 404;
+        ctx.body = {error: 'Invoice not found'};
+        return;
       }
-      return {
-        status: 200,
-        body: invoice
-      };
+      ctx.body = invoice;
     } catch (error) {
-      return {
-        status: 500,
-        body: {error: error.message}
-      };
+      ctx.status = 500;
+      ctx.body = {error: error.message};
     }
-  },
+    return;
+  }
 
   // IDOR Vulnerability: No ownership check on delete
-  'DELETE /api/invoice/:id': async ({params, headers}) => {
+  if (path.startsWith('/api/invoice/') && method === 'DELETE') {
     try {
-      const token = headers.authorization?.replace('Bearer ', '');
+      const token = ctx.headers.authorization?.replace('Bearer ', '');
       await verifyToken(token);
-      const invoice = await deleteInvoice(params.id);
+      const invoiceId = path.split('/')[3];
+      const invoice = await deleteInvoice(invoiceId);
       if (!invoice) {
-        return {
-          status: 404,
-          body: {error: 'Invoice not found'}
-        };
+        ctx.status = 404;
+        ctx.body = {error: 'Invoice not found'};
+        return;
       }
-      return {
-        status: 200,
-        body: {message: 'Invoice deleted successfully'}
-      };
+      ctx.body = {message: 'Invoice deleted successfully'};
     } catch (error) {
-      return {
-        status: 500,
-        body: {error: error.message}
-      };
+      ctx.status = 500;
+      ctx.body = {error: error.message};
     }
+    return;
   }
+
+  await next();
 };
