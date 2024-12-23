@@ -2,6 +2,38 @@
 
 An open-source app to generate / share invoices and download as PDF.
 
+## Security Vulnerabilities (For Educational Purposes)
+
+This application intentionally includes security vulnerabilities for educational purposes. DO NOT use this version in production.
+
+### 1. Insecure Direct Object References (IDOR)
+
+The application has IDOR vulnerabilities in the invoice endpoints that allow unauthorized access:
+
+- GET `/api/invoice/:id` - Users can view any invoice by ID without proper authorization
+- PUT `/api/invoice/:id` - Users can modify any invoice by ID without ownership verification
+- DELETE `/api/invoice/:id` - Users can delete any invoice by ID without ownership verification
+
+Only the `/api/invoice/all` endpoint properly checks user ownership.
+
+### 2. JWT Authentication Issues
+
+The application has several JWT-related security issues:
+
+- Static JWT secret key hardcoded in the source code
+- Weak algorithm (HS256) for token signing
+- No key rotation mechanism
+- Sensitive user data included in JWT payload
+
+### Testing the Vulnerabilities
+
+Run the test script to demonstrate these vulnerabilities:
+```bash
+python test/test_idor.py
+```
+
+The test shows how user "Bob" can access, modify, and delete user "Alice's" invoices due to missing ownership checks.
+
 ## Features
 
 1. Generate invoice
