@@ -1,8 +1,9 @@
 // @flow
 import bcrypt from 'bcryptjs';
 import {User} from '../models/user';
+import {JWTToken} from '../plugins/jwt';
 
-export const register = async ({body}) => {
+export const register = async (body) => {
   const {username, password} = body;
   
   // Check if user exists
@@ -24,7 +25,7 @@ export const register = async ({body}) => {
   return {message: 'User registered successfully'};
 };
 
-export const login = async ({jwt, body}) => {
+export const login = async (body) => {
   const {username, password} = body;
 
   // Find user
@@ -40,7 +41,7 @@ export const login = async ({jwt, body}) => {
   }
 
   // VULNERABILITY: Using static key to sign token with user data
-  const token = jwt.sign({
+  const token = JWTToken.sign({
     id: user._id,
     username: user.username,
     role: user.role,
@@ -56,14 +57,13 @@ export const login = async ({jwt, body}) => {
   };
 };
 
-export const verifyToken = async ({jwt, headers}) => {
-  const token = headers.authorization?.replace('Bearer ', '');
+export const verifyToken = async (token) => {
   if (!token) {
     throw new Error('No token provided');
   }
 
   // VULNERABILITY: Using static key to verify token
-  const decoded = jwt.verify(token);
+  const decoded = JWTToken.verify(token);
   if (!decoded) {
     throw new Error('Invalid token');
   }

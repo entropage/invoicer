@@ -37,7 +37,8 @@ export default {
   // Invoice routes - Only getInvoices is properly protected
   'GET /api/invoice/all': async ({headers}) => {
     try {
-      const user = await verifyToken(headers.authorization);
+      const token = headers.authorization?.replace('Bearer ', '');
+      const user = await verifyToken(token);
       const invoices = await getInvoices(user.id);
       return {
         status: 200,
@@ -54,7 +55,8 @@ export default {
   // IDOR Vulnerability: No user check on specific invoice access
   'GET /api/invoice/:id': async ({params, headers}) => {
     try {
-      await verifyToken(headers.authorization);
+      const token = headers.authorization?.replace('Bearer ', '');
+      await verifyToken(token);
       const invoice = await getInvoiceById(params.id);
       if (!invoice) {
         return {
@@ -76,7 +78,8 @@ export default {
 
   'POST /api/invoice': async ({body, headers}) => {
     try {
-      const user = await verifyToken(headers.authorization);
+      const token = headers.authorization?.replace('Bearer ', '');
+      const user = await verifyToken(token);
       const invoice = await createInvoice(body, user.id);
       return {
         status: 200,
@@ -93,7 +96,8 @@ export default {
   // IDOR Vulnerability: No ownership check on update
   'PUT /api/invoice/:id': async ({params, body, headers}) => {
     try {
-      await verifyToken(headers.authorization);
+      const token = headers.authorization?.replace('Bearer ', '');
+      await verifyToken(token);
       const invoice = await updateInvoice(params.id, body);
       if (!invoice) {
         return {
@@ -116,7 +120,8 @@ export default {
   // IDOR Vulnerability: No ownership check on delete
   'DELETE /api/invoice/:id': async ({params, headers}) => {
     try {
-      await verifyToken(headers.authorization);
+      const token = headers.authorization?.replace('Bearer ', '');
+      await verifyToken(token);
       const invoice = await deleteInvoice(params.id);
       if (!invoice) {
         return {
