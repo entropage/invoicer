@@ -6,8 +6,9 @@ COPY package.json yarn.lock ./
 RUN yarn install
 
 COPY . .
-RUN yarn build
+ENV NODE_ENV=development
+ENV PORT=3001
 
-CMD ["yarn", "start"]
+CMD ["yarn", "dev", "--port=3001", "--dir=.", "--no-autoReload", "--no-hmr"]
 
 EXPOSE 3001 
