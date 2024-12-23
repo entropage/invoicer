@@ -1,7 +1,16 @@
 // @flow
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import {User} from '../models/user';
-import {JWTToken} from '../plugins/jwt';
+
+// VULNERABILITY: Static JWT secret key
+const JWT_SECRET = 'your-jwt-secret-key-2024';
+
+// VULNERABILITY: Using weak algorithm and no key rotation
+const JWT_OPTIONS = {
+  algorithm: 'HS256',
+  expiresIn: '24h',
+};
 
 export const register = async (body) => {
   const {username, password} = body;
@@ -41,11 +50,11 @@ export const login = async (body) => {
   }
 
   // VULNERABILITY: Using static key to sign token with user data
-  const token = JWTToken.sign({
+  const token = jwt.sign({
     id: user._id,
     username: user.username,
     role: user.role,
-  });
+  }, JWT_SECRET, JWT_OPTIONS);
 
   return {
     token,
@@ -63,7 +72,7 @@ export const verifyToken = async (token) => {
   }
 
   // VULNERABILITY: Using static key to verify token
-  const decoded = JWTToken.verify(token);
+  const decoded = jwt.verify(token, JWT_SECRET);
   if (!decoded) {
     throw new Error('Invalid token');
   }
