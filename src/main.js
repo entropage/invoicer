@@ -25,6 +25,26 @@ export default function() {
         console.log('Mongodb Connected.');
       });
 
+    app.middleware((ctx, next) => {
+      if (ctx.request.is('application/json')) {
+        return new Promise((resolve) => {
+          let body = '';
+          ctx.req.on('data', chunk => {
+            body += chunk.toString();
+          });
+          ctx.req.on('end', () => {
+            try {
+              ctx.request.body = JSON.parse(body);
+            } catch (e) {
+              ctx.request.body = {};
+            }
+            resolve(next());
+          });
+        });
+      }
+      return next();
+    }, 1);
+
     app.middleware(handlers);
   }
 
