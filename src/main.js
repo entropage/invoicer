@@ -16,12 +16,14 @@ import Router from 'fusion-plugin-react-router';
 import {App as ClientApp} from './App';
 import {handlers} from './handlers';
 import {MONGODB_URI} from './constants';
+import {JWTPlugin, JWTToken} from './plugins/jwt';
 
 export default function() {
   const app = new App(ClientApp);
   app.register(Router);
   app.register(HelmetPlugin);
   app.register(MuiThemeProviderToken, MuiThemeProvider);
+  app.register(JWTToken, JWTPlugin);
 
   if (__NODE__) {
     mongoose
