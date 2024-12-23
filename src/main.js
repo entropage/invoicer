@@ -2,7 +2,7 @@
 // libs
 import App from 'fusion-react';
 import HelmetPlugin from 'fusion-plugin-react-helmet-async';
-import {HttpHandlerToken} from 'fusion-plugin-http-router';
+import {HttpHandlersToken, HttpRouterToken} from 'fusion-plugin-http-router';
 import mongoose from 'mongoose';
 import Router from 'fusion-plugin-react-router';
 
@@ -26,7 +26,7 @@ export default function() {
         console.log('Mongodb Connected.');
       });
 
-    app.register(HttpHandlerToken, handlers);
+    app.register(HttpHandlersToken, handlers);
   }
 
   return app;
