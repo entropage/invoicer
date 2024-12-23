@@ -1,26 +1,53 @@
 // @flow
 // src
 import {BASE_URL} from '../constants';
+import {login, register, verifyToken} from './auth';
 import {createInvoice, getInvoiceById, getInvoices} from './invoice';
 import {getPdf} from '../utils/puppeteer';
 
 export const handlers = {
-  '/api/invoice': {
-    POST: ({body: values}) => createInvoice(values),
+  '/api/auth': {
+    '/register': {
+      POST: register,
+    },
+    '/login': {
+      POST: login,
+    },
+    '/verify': {
+      GET: verifyToken,
+    },
+  },
 
-    '/all': {GET: getInvoices},
+  '/api/invoice': {
+    POST: async (ctx) => {
+      // VULNERABILITY: Token verification with static key
+      await verifyToken(ctx);
+      return createInvoice(ctx.body);
+    },
+
+    '/all': {
+      GET: async (ctx) => {
+        // VULNERABILITY: Token verification with static key
+        await verifyToken(ctx);
+        return getInvoices();
+      },
+    },
 
     '/download': {
-      POST: ({body: values}) => {
-        return createInvoice(values).then(res =>
-          getPdf(`${BASE_URL}/${values.invoice.invoiceId}`)
+      POST: async (ctx) => {
+        // VULNERABILITY: Token verification with static key
+        await verifyToken(ctx);
+        return createInvoice(ctx.body.values).then(res =>
+          getPdf(`${BASE_URL}/${ctx.body.values.invoice.invoiceId}`)
         );
       },
     },
 
     '/:id': {
-      GET: async ({params: {id}}) => {
-        return getInvoiceById(id).then(res => {
+      GET: async (ctx) => {
+        // VULNERABILITY: Token verification with static key
+        await verifyToken(ctx);
+        return getInvoiceById(ctx.params.id).then(res => {
           if (!res) {
             return Promise.reject(new Error("Invoice doesn't exist."));
           }
