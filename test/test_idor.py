@@ -6,8 +6,8 @@ from typing import Dict, Optional
 BASE_URL = "http://10.0.0.105:3001/api"
 
 class InvoicerClient:
-    def __init__(self, email: str, password: str):
-        self.email = email
+    def __init__(self, username: str, password: str):
+        self.username = username
         self.password = password
         self.token: Optional[str] = None
         self.user_id: Optional[str] = None
@@ -17,7 +17,7 @@ class InvoicerClient:
         try:
             response = requests.post(
                 f"{BASE_URL}/auth/register",
-                json={"email": self.email, "password": self.password}
+                json={"username": self.username, "password": self.password}
             )
             return response.status_code == 200
         except:
@@ -28,11 +28,12 @@ class InvoicerClient:
         try:
             response = requests.post(
                 f"{BASE_URL}/auth/login",
-                json={"email": self.email, "password": self.password}
+                json={"username": self.username, "password": self.password}
             )
             if response.status_code == 200:
                 data = response.json()
                 self.token = data.get("token")
+                self.user_id = data.get("user", {}).get("id")
                 return True
         except:
             pass
@@ -54,7 +55,7 @@ class InvoicerClient:
                 "issueDate": "2024-01-01",
                 "items": [
                     {
-                        "description": f"Test Item for {self.email}",
+                        "description": f"Test Item for {self.username}",
                         "quantity": 1,
                         "unitPrice": amount
                     }
@@ -161,8 +162,8 @@ def print_result(title: str, data: Optional[Dict]):
 
 def test_idor():
     # Create two users
-    alice = InvoicerClient("alice@test.com", "password123")
-    bob = InvoicerClient("bob@test.com", "password123")
+    alice = InvoicerClient("alice", "alice123")
+    bob = InvoicerClient("bob", "bob123")
 
     print_step(1, "Setting up users")
     print("Registering users (will proceed even if they exist)...")
