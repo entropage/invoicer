@@ -26,6 +26,7 @@
     "fusion-react": "^3.0.0",
     "fusion-tokens": "^2.0.0",
     "jsonwebtoken": "^9.0.0",
+    "koa-bodyparser": "^4.4.1",
     "mongoose": "^5.9.4",
     "puppeteer": "^2.1.1",
     "react": "^16.13.0",
