@@ -1,70 +1,138 @@
 // @flow
-import {Router} from 'express';
 import {createInvoice, getInvoiceById, getInvoices, updateInvoice, deleteInvoice} from './invoice';
-import {login, register, authenticate} from './auth';
+import {login, register, verifyToken} from './auth';
 
-const router = Router();
-
-// Auth routes
-router.post('/auth/login', login);
-router.post('/auth/register', register);
-
-// Invoice routes - Only getInvoices is properly protected
-router.get('/invoice/all', authenticate, async (req, res) => {
-  try {
-    const invoices = await getInvoices(req.user.id);
-    res.json(invoices);
-  } catch (error) {
-    res.status(500).json({error: error.message});
-  }
-});
-
-// IDOR Vulnerability: No user check on specific invoice access
-router.get('/invoice/:id', authenticate, async (req, res) => {
-  try {
-    const invoice = await getInvoiceById(req.params.id);
-    if (!invoice) {
-      return res.status(404).json({error: 'Invoice not found'});
+export default {
+  // Auth routes
+  'POST /api/auth/login': async ({body}) => {
+    try {
+      const result = await login(body);
+      return {
+        status: 200,
+        body: result
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        body: {error: error.message}
+      };
     }
-    res.json(invoice);
-  } catch (error) {
-    res.status(500).json({error: error.message});
-  }
-});
+  },
 
-router.post('/invoice', authenticate, async (req, res) => {
-  try {
-    const invoice = await createInvoice(req.body, req.user.id);
-    res.json(invoice);
-  } catch (error) {
-    res.status(500).json({error: error.message});
-  }
-});
-
-// IDOR Vulnerability: No ownership check on update
-router.put('/invoice/:id', authenticate, async (req, res) => {
-  try {
-    const invoice = await updateInvoice(req.params.id, req.body);
-    if (!invoice) {
-      return res.status(404).json({error: 'Invoice not found'});
+  'POST /api/auth/register': async ({body}) => {
+    try {
+      const result = await register(body);
+      return {
+        status: 200,
+        body: result
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        body: {error: error.message}
+      };
     }
-    res.json(invoice);
-  } catch (error) {
-    res.status(500).json({error: error.message});
-  }
-});
+  },
 
-// IDOR Vulnerability: No ownership check on delete
-router.delete('/invoice/:id', authenticate, async (req, res) => {
-  try {
-    const invoice = await deleteInvoice(req.params.id);
-    if (!invoice) {
-      return res.status(404).json({error: 'Invoice not found'});
+  // Invoice routes - Only getInvoices is properly protected
+  'GET /api/invoice/all': async ({headers}) => {
+    try {
+      const user = await verifyToken(headers.authorization);
+      const invoices = await getInvoices(user.id);
+      return {
+        status: 200,
+        body: invoices
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        body: {error: error.message}
+      };
     }
-    res.json({message: 'Invoice deleted successfully'});
-  } catch (error) {
-    res.status(500).json({error: error.message});
-  }
-});
+  },
 
-export default router;
+  // IDOR Vulnerability: No user check on specific invoice access
+  'GET /api/invoice/:id': async ({params, headers}) => {
+    try {
+      await verifyToken(headers.authorization);
+      const invoice = await getInvoiceById(params.id);
+      if (!invoice) {
+        return {
+          status: 404,
+          body: {error: 'Invoice not found'}
+        };
+      }
+      return {
+        status: 200,
+        body: invoice
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        body: {error: error.message}
+      };
+    }
+  },
+
+  'POST /api/invoice': async ({body, headers}) => {
+    try {
+      const user = await verifyToken(headers.authorization);
+      const invoice = await createInvoice(body, user.id);
+      return {
+        status: 200,
+        body: invoice
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        body: {error: error.message}
+      };
+    }
+  },
+
+  // IDOR Vulnerability: No ownership check on update
+  'PUT /api/invoice/:id': async ({params, body, headers}) => {
+    try {
+      await verifyToken(headers.authorization);
+      const invoice = await updateInvoice(params.id, body);
+      if (!invoice) {
+        return {
+          status: 404,
+          body: {error: 'Invoice not found'}
+        };
+      }
+      return {
+        status: 200,
+        body: invoice
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        body: {error: error.message}
+      };
+    }
+  },
+
+  // IDOR Vulnerability: No ownership check on delete
+  'DELETE /api/invoice/:id': async ({params, headers}) => {
+    try {
+      await verifyToken(headers.authorization);
+      const invoice = await deleteInvoice(params.id);
+      if (!invoice) {
+        return {
+          status: 404,
+          body: {error: 'Invoice not found'}
+        };
+      }
+      return {
+        status: 200,
+        body: {message: 'Invoice deleted successfully'}
+      };
+    } catch (error) {
+      return {
+        status: 500,
+        body: {error: error.message}
+      };
+    }
+  }
+};
