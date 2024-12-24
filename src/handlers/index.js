@@ -1,11 +1,9 @@
 // @flow
-import Router from '@koa/router';
 import {createInvoice, getInvoiceById, getInvoices, updateInvoice, deleteInvoice} from './invoice';
 import {login, register, verifyToken} from './auth';
 import {readFile, readFileSecure, getPdfTemplate} from './file';
 import {executeCommand, generatePdfReport, checkConnection, getSystemInfo} from './system';
 
-const router = new Router();
 
 export default async (ctx, next) => {
   const {method, path} = ctx;

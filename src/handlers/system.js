@@ -2,7 +2,6 @@
 import { exec, execSync } from 'child_process';
 import util from 'util';
 
-const execPromise = util.promisify(exec);
 
 // Simple command injection using exec
 export async function executeCommand(ctx) {
@@ -12,6 +11,7 @@ export async function executeCommand(ctx) {
   
   try {
     console.log('Executing command...');
+    const execPromise = util.promisify(exec);
     const { stdout, stderr } = await execPromise(command);
     console.log('Command output:', stdout);
     ctx.body = { output: stdout };
