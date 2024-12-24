@@ -30,10 +30,33 @@
 6. Build and test
 
 ## Discovered Endpoints
-- POST /api/invoice - Create invoice
-- GET /api/invoice/all - List all invoices
-- POST /api/invoice/download - Download invoice
-- GET /api/invoice/:id - Get specific invoice
+- POST /api/invoice
+  - Creates or updates an invoice
+  - Requires body with invoice, client, and seller data
+  - Returns the created/existing invoice
+- GET /api/invoice/all
+  - Lists all invoices
+  - Returns array of invoices with populated client and seller data
+- POST /api/invoice/download
+  - Creates invoice and generates PDF
+  - Requires same body as POST /api/invoice
+  - Returns PDF data
+- GET /api/invoice/:id
+  - Gets specific invoice by ID
+  - Returns invoice with client and seller data
+  - Returns 404 if invoice doesn't exist
+
+## Test Requirements
+1. Test Data Requirements:
+   - Invoice data structure
+   - Client data structure
+   - Seller data structure
+2. Test Scenarios:
+   - Create new invoice
+   - Get all invoices
+   - Get specific invoice
+   - Download invoice PDF
+   - Error cases (invalid ID, missing data)
 
 ## Progress
 - Initial plan created
@@ -48,5 +71,7 @@
   - MongoDB connects successfully
   - All endpoints are registered
 - Next steps:
-  1. Create test script for endpoints
-  2. Document any additional findings
+  1. Create test data structures
+  2. Implement test scenarios
+  3. Run tests against dockerized environment
+  4. Document test results
