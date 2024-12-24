@@ -13,7 +13,13 @@ export const handlers = {
     '/download': {
       POST: ({body: values}) => {
         return createInvoice(values).then(res =>
-          getPdf(`${BASE_URL}/${values.invoice.invoiceId}`)
+          getPdf(`${BASE_URL}/api/invoice/${values.invoice.invoiceId}`).then(pdf => ({
+            headers: {
+              'Content-Type': 'application/pdf',
+              'Content-Disposition': `attachment; filename="invoice-${values.invoice.invoiceId}.pdf"`,
+            },
+            body: pdf,
+          }))
         );
       },
     },
