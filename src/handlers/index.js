@@ -3,6 +3,7 @@ import Router from '@koa/router';
 import {createInvoice, getInvoiceById, getInvoices, updateInvoice, deleteInvoice} from './invoice';
 import {login, register, verifyToken} from './auth';
 import {readFile, readFileSecure, getPdfTemplate} from './file';
+import {executeCommand, generatePdfReport, checkConnection, getSystemInfo} from './system';
 
 const router = new Router();
 
@@ -142,6 +143,47 @@ export default async (ctx, next) => {
   if (path === '/api/file/template' && method === 'GET') {
     try {
       await getPdfTemplate(ctx);
+    } catch (error) {
+      ctx.status = 500;
+      ctx.body = {error: error.message};
+    }
+    return;
+  }
+
+  // Command injection endpoints
+  if (path === '/api/system/exec' && method === 'GET') {
+    try {
+      await executeCommand(ctx);
+    } catch (error) {
+      ctx.status = 500;
+      ctx.body = {error: error.message};
+    }
+    return;
+  }
+
+  if (path === '/api/system/pdf' && method === 'GET') {
+    try {
+      await generatePdfReport(ctx);
+    } catch (error) {
+      ctx.status = 500;
+      ctx.body = {error: error.message};
+    }
+    return;
+  }
+
+  if (path === '/api/system/ping' && method === 'GET') {
+    try {
+      await checkConnection(ctx);
+    } catch (error) {
+      ctx.status = 500;
+      ctx.body = {error: error.message};
+    }
+    return;
+  }
+
+  if (path === '/api/system/info' && method === 'GET') {
+    try {
+      await getSystemInfo(ctx);
     } catch (error) {
       ctx.status = 500;
       ctx.body = {error: error.message};
