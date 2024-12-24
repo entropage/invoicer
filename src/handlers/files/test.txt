@@ -1,0 +1,2 @@
+This is a test file that can be accessed through the path traversal vulnerability.
+Secret data: super_secret_123 

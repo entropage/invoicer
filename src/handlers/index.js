@@ -1,6 +1,10 @@
 // @flow
+import Router from '@koa/router';
 import {createInvoice, getInvoiceById, getInvoices, updateInvoice, deleteInvoice} from './invoice';
 import {login, register, verifyToken} from './auth';
+import {readFile, readFileSecure, getPdfTemplate} from './file';
+
+const router = new Router();
 
 export default async (ctx, next) => {
   const {method, path} = ctx;
@@ -107,6 +111,37 @@ export default async (ctx, next) => {
         return;
       }
       ctx.body = {message: 'Invoice deleted successfully'};
+    } catch (error) {
+      ctx.status = 500;
+      ctx.body = {error: error.message};
+    }
+    return;
+  }
+
+  // Vulnerable file endpoints
+  if (path === '/api/file/read' && method === 'GET') {
+    try {
+      await readFile(ctx);
+    } catch (error) {
+      ctx.status = 500;
+      ctx.body = {error: error.message};
+    }
+    return;
+  }
+
+  if (path === '/api/file/secure-read' && method === 'GET') {
+    try {
+      await readFileSecure(ctx);
+    } catch (error) {
+      ctx.status = 500;
+      ctx.body = {error: error.message};
+    }
+    return;
+  }
+
+  if (path === '/api/file/template' && method === 'GET') {
+    try {
+      await getPdfTemplate(ctx);
     } catch (error) {
       ctx.status = 500;
       ctx.body = {error: error.message};
