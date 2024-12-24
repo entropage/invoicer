@@ -1,0 +1,2 @@
+- don't introduce any new dependencies, only use the ones already in the project.
+- after git commit/push, always run 'git status' to check if there are any changes that need to be committed.

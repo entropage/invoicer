@@ -12,13 +12,14 @@ export const handlers = {
 
     '/download': {
       POST: ({body: values}) => {
-        return createInvoice(values).then(res =>
+        return createInvoice(values).then(result =>
           getPdf(`${BASE_URL}/api/invoice/${values.invoice.invoiceId}`).then(pdf => ({
             headers: {
               'Content-Type': 'application/pdf',
               'Content-Disposition': `attachment; filename="invoice-${values.invoice.invoiceId}.pdf"`,
+              'Content-Length': pdf.length
             },
-            body: pdf,
+            body: pdf
           }))
         );
       },

@@ -12,7 +12,7 @@ services:
     environment:
       - PORT=3000
       - NODE_ENV=production
-      - MONGODB_URI=mongodb://invoicer-mongodb:27017/invoicer
+      - MONGODB_URI=mongodb://mongodb:27017/invoicer
       - BASE_URL=http://invoicer-app:3000
     networks:
       - invoicer-net
@@ -21,8 +21,8 @@ services:
 
   mongodb:
     image: mongo:latest
-    container_name: invoicer-mongodb
-    hostname: invoicer-mongodb
+    container_name: mongodb
+    hostname: mongodb
     ports:
       - "27017:27017"
     volumes:

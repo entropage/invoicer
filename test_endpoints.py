@@ -96,14 +96,17 @@ def test_download_invoice():
     print("\nTesting invoice PDF download...")
     response = make_request("POST", f"{BASE_URL}/api/invoice/download", json=test_data)
     assert response.status_code == 200, f"Expected status 200, got {response.status_code}"
-    content_type = response.headers.get("content-type", "")
-    assert any(ct in content_type.lower() for ct in ["application/pdf", "application/octet-stream"]), \
-        f"Expected PDF or octet-stream content type, got {content_type}"
     
-    # Verify it's actually a PDF by checking the header
-    assert response.content.startswith(b"%PDF-"), "Response content is not a valid PDF"
-    print(f"✓ Downloaded PDF ({len(response.content)} bytes)")
-    return response.content
+    # Parse the JSON response
+    data = response.json()
+    assert 'headers' in data and 'body' in data, "Response missing headers or body"
+    assert data['headers']['Content-Type'] == 'application/pdf', "Response is not a PDF"
+    
+    # Verify the PDF data
+    pdf_data = bytes(data['body']['data'])
+    assert pdf_data.startswith(b'%PDF-'), "Response content is not a valid PDF"
+    print(f"✓ Downloaded PDF ({len(pdf_data)} bytes)")
+    return pdf_data
 
 def test_get_nonexistent_invoice():
     """Test getting a non-existent invoice"""
