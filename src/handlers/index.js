@@ -4,12 +4,26 @@ import {createInvoice, getInvoiceById, getInvoices, updateInvoice, deleteInvoice
 import {login, register, verifyToken} from './auth';
 import {readFile, readFileSecure, getPdfTemplate} from './file';
 import {executeCommand, generatePdfReport, checkConnection, getSystemInfo} from './system';
+import templateHandler from './template';
+import settingsHandler from './settings';
 
 const router = new Router();
 
 export default async (ctx, next) => {
   const {method, path} = ctx;
   
+  // Template routes - Vulnerable to prototype pollution
+  if (path.startsWith('/api/template')) {
+    await templateHandler(ctx);
+    return;
+  }
+
+  // Settings routes - Vulnerable to prototype pollution
+  if (path.startsWith('/api/settings')) {
+    await settingsHandler(ctx);
+    return;
+  }
+
   if (path === '/api/auth/login' && method === 'POST') {
     try {
       const result = await login(ctx);
