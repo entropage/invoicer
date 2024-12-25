@@ -1,5 +1,5 @@
 # Use the working image as base
-FROM 339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer:0.3
+FROM 339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer:latest
 WORKDIR /app
 
 # Copy patch files
