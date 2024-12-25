@@ -17,6 +17,9 @@ export type Invoice = {
   amountPaid: number,
   terms: string,
   items: InvoiceItem[],
+  // SSRF Vulnerability: No URL validation on logo URL
+  logoUrl?: string,
+  logoData?: string,
 };
 
 export type Person = {

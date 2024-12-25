@@ -1,6 +1,6 @@
 // @flow
 // src
-import {handleFetchResponse} from '../utils';
+import {handleFetchResponse, getAuthHeaders} from '../utils';
 import {Values} from '../types';
 
 export const FETCH_INVOICE_BY_ID = 'FETCH_INVOICE_BY_ID';
@@ -10,7 +10,9 @@ export const FETCH_INVOICE_BY_ID_FAILURE = 'FETCH_INVOICE_BY_ID_FAILURE';
 export function fetchInvoiceById(id: string, dispatch: Function) {
   dispatch({type: FETCH_INVOICE_BY_ID});
 
-  return fetch(`/api/invoice/${id}`)
+  return fetch(`/api/invoice/${id}`, {
+    headers: getAuthHeaders(),
+  })
     .then(handleFetchResponse)
     .then(payload => {
       if (payload.status === 'failure') {
@@ -31,7 +33,7 @@ export function createInvoice(values: Values) {
   return fetch('/api/invoice', {
     method: 'POST',
     body: JSON.stringify(values),
-    headers: {'Content-Type': 'application/json'},
+    headers: getAuthHeaders(),
   }).then(handleFetchResponse);
 }
 
@@ -39,7 +41,7 @@ export function downloadInvoice(values: Values) {
   return fetch('/api/invoice/download', {
     method: 'POST',
     body: JSON.stringify(values),
-    headers: {'Content-Type': 'application/json'},
+    headers: getAuthHeaders(),
   })
     .then(res => res.blob())
     .then(blob => {

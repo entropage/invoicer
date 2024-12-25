@@ -1,0 +1,8 @@
+FROM mcr.microsoft.com/playwright:v1.49.1-jammy
+
+# Install pip and playwright
+RUN apt-get update && \
+    apt-get install -y python3-pip && \
+    python3 -m pip install playwright
+
+WORKDIR /app 

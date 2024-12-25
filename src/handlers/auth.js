@@ -1,7 +1,13 @@
 // @flow
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import {Buffer} from 'buffer';
 import {User} from '../models/user';
+
+// Make Buffer available globally for JWT
+if (typeof window !== 'undefined') {
+  window.Buffer = Buffer;
+}
 
 // VULNERABILITY: Static JWT secret key
 const JWT_SECRET = 'your-jwt-secret-key-2024';

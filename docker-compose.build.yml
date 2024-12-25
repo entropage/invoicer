@@ -1,0 +1,25 @@
+version: '3'
+services:
+  invoicer:
+    build:
+      context: .
+    ports:
+      - "3001:3001"
+      - "9229:9229"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - DEBUG=*
+      - MONGODB_URI=mongodb://mongodb:27017/invoicer
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:

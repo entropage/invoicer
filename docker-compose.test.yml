@@ -1,0 +1,9 @@
+version: '3'
+services:
+  test:
+    image: invoicer-test
+    working_dir: /app
+    volumes:
+      - .:/app
+    command: python3 test/test_buffer_fix.py
+    network_mode: "host" 
