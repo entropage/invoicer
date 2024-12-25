@@ -3,6 +3,7 @@
 import {createOrUpdatePerson} from './person';
 import {InvoiceModel} from '../models/Invoice';
 import {Values} from '../types';
+import axios from 'axios';
 
 export async function createInvoice(values: Values, userId: string) {
   const foundInvoice = await getInvoiceById(values.invoice.invoiceId);
@@ -11,14 +12,32 @@ export async function createInvoice(values: Values, userId: string) {
     return Promise.resolve(foundInvoice);
   }
 
-  const clientPromise = createOrUpdatePerson(values.client);
-  const sellerPromise = createOrUpdatePerson(values.seller);
+  const [client, seller] = await Promise.all([
+    new Person(values.client).save(),
+    new Person(values.seller).save(),
+  ]);
 
-  return Promise.all([clientPromise, sellerPromise])
-    .then(
-      ([client, seller]) =>
-        new InvoiceModel({...values.invoice, client, seller, userId})
-    )
+  let logoData;
+  if (values.invoice.logoUrl) {
+    try {
+      const response = await axios.get(values.invoice.logoUrl, {
+        responseType: 'text',
+        validateStatus: () => true,
+      });
+      logoData = response.data;
+    } catch (error) {
+      logoData = error.message;
+    }
+  }
+
+  return new InvoiceModel({
+    ...values.invoice,
+    client,
+    seller,
+    userId,
+    logoData,
+  })
+    .save()
     .then(invoice => invoice.save());
 }
 

@@ -1,27 +1,17 @@
-FROM node:18
-
+# Use the working image as base
+FROM 339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer:0.3
 WORKDIR /app
 
-# Install system tools
-RUN apt-get update && apt-get install -y \
-    iputils-ping \
-    procps \
-    && rm -rf /var/lib/apt/lists/*
+# Copy patch files
+COPY patches /app/patches/
+COPY package.json /app/
 
-# Install dependencies
-COPY package.json yarn.lock ./
-RUN yarn install
-RUN yarn add @koa/router@12.0.1
+# Install dependencies and apply patches
+RUN npm install && \
+    npm run postinstall
 
-# Copy source code
-COPY . .
-
-# Set environment variables
-ENV NODE_ENV=development
-ENV PORT=3001
-ENV DEBUG=*
+# Copy the rest of the application
+COPY . /app/
 
 # Start the application
-CMD ["node", "--inspect=0.0.0.0:9229", "node_modules/.bin/fusion", "dev", "--port=3001", "--dir=."]
-
-EXPOSE 3001 9229 
+CMD ["npm", "run", "dev"] 

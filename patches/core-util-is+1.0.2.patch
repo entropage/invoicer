@@ -1,0 +1,14 @@
+diff --git a/lib/util.js b/lib/util.js
+index 7810af6..0c12346 100644
+--- a/lib/util.js
++++ b/lib/util.js
+@@ -102,7 +102,7 @@ function isPrimitive(arg) {
+ }
+ exports.isPrimitive = isPrimitive;
+ 
+-exports.isBuffer = Buffer.isBuffer;
++exports.isBuffer = typeof Buffer !== 'undefined' ? Buffer.isBuffer : function() { return false; };
+ 
+ function objectToString(o) {
+   return Object.prototype.toString.call(o);
+} 
