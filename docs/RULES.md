@@ -1,56 +1,104 @@
 # Project Rules and Guidelines
 
-## Development Rules
+## Project Overview
+- Educational project demonstrating web application vulnerabilities
+- Running on remote Linux Docker container (port 3001)
+- Intentionally vulnerable for POC purposes
 
-1. **Project Purpose**
-   - This is an educational project
-   - Security vulnerabilities are intentional for POC purposes
-   - Do not attempt to fix security issues unless specifically requested
+## Technology Stack
+1. **Framework**
+   - Fusion.js (not Express.js)
+   - Koa (native to Fusion.js)
+   - Built-in Fusion.js features preferred
 
-2. **Technology Stack**
-   - Use Fusion.js instead of Express.js
-   - Use Koa (native to Fusion.js)
+2. **Dependencies**
    - Minimize new dependencies
-   - Use built-in Fusion.js features when possible
+   - Use yarn for Node.js packages
+   - Use venv for Python dependencies
 
-3. **Development Practices**
+3. **Development Tools**
+   - Docker for containerization
+   - Python for testing and automation
+   - Git for version control
+
+## Development Guidelines
+
+1. **Code Management**
    - Check for existing files before creating new ones
-   - Always use `docker-compose up -d` to keep shell access
-   - Run `pwd` before commands with directory dependencies
+   - Don't modify core configuration files unless necessary:
+     * Dockerfile
+     * docker-compose.yml
+     * package.json
+
+2. **Docker Operations**
+   - Use `docker-compose up -d` to maintain shell access
    - Use `docker build` instead of `docker compose build`
-   - Activate virtual environment (`source venv/bin/activate`) before running Python scripts
+   - Always verify working directory with `pwd`
 
-## Docker Image Versioning Rules
+3. **Package Management**
+   - Use yarn instead of npm
+   - Use `yarn add --verbose` for better debugging
+   - Activate venv before running Python scripts
 
-1. **Version Format: MAJOR.MINOR**
+## Docker Image Versioning
+
+1. **Version Format**
+   ```
+   MAJOR.MINOR-GITSHA
+   Example: 0.7-8287548
+   ```
    - MAJOR: Breaking changes
    - MINOR: New features or non-breaking changes
+   - GITSHA: First 7 characters of git commit hash
 
-2. **Image Tags**
-   - Format: VERSION-GITSHA
-   - Example: 0.7-3f1a721
+2. **Current Version: 0.7-8287548**
+   Latest features: Integrated test suite and vulnerability verification
 
-3. **Tag Management**
-   - Never reuse version tags
-   - Each build gets a new version number
-   - Keep old versions available in registries
-
-4. **Registry Rules**
-   - Development: Local registry (invoicer:VERSION-GITSHA)
-   - Staging: AWS ECR (339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer:VERSION-GITSHA)
-   - Production: Same as staging but with additional testing
-
-5. **Version History**
-   - 0.1: Initial release
-   - 0.2: Added authentication
-   - 0.3: Added SSRF vulnerability
-   - 0.4: Added command injection
-   - 0.5: Added path traversal
-   - 0.6: Added IDOR vulnerability
+3. **Version History**
    - 0.7: Integrated test suite and vulnerability verification
+   - 0.6: Added IDOR vulnerability
+   - 0.5: Added path traversal
+   - 0.4: Added command injection
+   - 0.3: Added SSRF vulnerability
+   - 0.2: Added authentication
+   - 0.1: Initial release
 
-6. **Build Process**
-   - Always build from a clean workspace
-   - Tag with both version and git SHA
-   - Push to all required registries
-   - Document changes in version history 
+4. **Registry Information**
+   ```
+   Registry: 339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer
+   Format: REGISTRY:VERSION-GITSHA
+   Example: 339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer:0.7-8287548
+   ```
+
+5. **Docker Commands**
+   ```bash
+   # Tag new version
+   docker tag IMAGE_ID REGISTRY:VERSION-GITSHA
+
+   # Push to registry
+   docker push REGISTRY:VERSION-GITSHA
+
+   # Pull specific version
+   docker pull REGISTRY:VERSION-GITSHA
+   ```
+
+## Vulnerability Implementation
+1. **SSRF (Server-Side Request Forgery)**
+   - Implemented in invoice logo URL handling
+   - Test with internal and external URLs
+
+2. **Path Traversal**
+   - Implemented in file reading functionality
+   - Test with various path formats
+
+3. **Command Injection**
+   - Implemented in system command execution
+   - Test with command chaining
+
+4. **IDOR (Insecure Direct Object References)**
+   - Implemented in invoice access
+   - Test with user permission bypass
+
+5. **JWT Vulnerabilities**
+   - Implemented in authentication
+   - Test with token manipulation 
