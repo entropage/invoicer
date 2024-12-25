@@ -1,0 +1,76 @@
+# Directory handling rules
+1. Always check current working directory with 'pwd' before executing directory-dependent commands
+2. Never use relative paths without first verifying current directory
+3. Use absolute paths when working across different directories
+4. Store the project root path in a variable for reference
+5. Before any 'cd' command, verify if already in target directory
+6. After any directory change, verify new location with 'pwd'
+7. Use $PWD to get absolute path of current directory
+8. Keep track of directory stack using 'pushd' and 'popd'
+9. When in doubt about location, use 'pwd' to verify
+10. Use command output to determine next directory operation
+
+# Command execution rules
+1. Always check command prerequisites before execution
+2. Verify tool/command availability before use
+3. Use full paths for critical operations
+4. Document directory assumptions for each command
+5. Log directory changes for debugging
+
+# Error handling rules
+1. Check exit codes after critical operations
+2. Provide fallback paths for failed directory changes
+3. Validate paths before operations
+4. Handle path-related errors gracefully
+5. Log directory-related errors
+
+# Best practices
+1. Use path variables instead of hardcoded paths
+2. Maintain a consistent directory structure
+3. Document directory dependencies
+4. Use directory guards for critical operations
+5. Implement path validation functions
+
+# Project-specific rules
+1. This is an educational project, don't try to fix security vulnerabilities (needed for POCs)
+2. The app runs on a remote Linux Docker container, listening on port 3001
+3. Check if files exist before creating new ones
+4. Use Fusion.js instead of Express.js
+5. Don't introduce new dependencies unless absolutely necessary
+6. Use built-in Fusion.js features as much as possible
+7. Use Koa (native to Fusion.js)
+8. Use "docker-compose up -d" instead of "docker-compose up"
+9. Run 'pwd' before directory-dependent commands
+10. Don't modify Dockerfile unless absolutely necessary
+11. Don't modify docker-compose.yml unless absolutely necessary
+12. Don't modify package.json unless absolutely necessary
+13. Use yarn instead of npm
+14. Use "yarn add --verbose" instead of "yarn add"
+15. Use venv for Python
+
+# Docker versioning rules
+1. Version format: MAJOR.MINOR-GITSHA
+   - Example: 0.7-8287548
+   - MAJOR: Breaking changes
+   - MINOR: New features or non-breaking changes
+   - GITSHA: First 7 characters of git commit hash
+
+2. Current version: 0.7-8287548
+   - Latest features: Integrated test suite and vulnerability verification
+   - Previous versions:
+     * 0.6: Added IDOR vulnerability
+     * 0.5: Added path traversal
+     * 0.4: Added command injection
+     * 0.3: Added SSRF vulnerability
+     * 0.2: Added authentication
+     * 0.1: Initial release
+
+3. Registry rules:
+   - Registry: 339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer
+   - Tag format: VERSION-GITSHA
+   - Example: 339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer:0.7-8287548
+
+4. Docker commands:
+   - Tag: docker tag IMAGE_ID REGISTRY:VERSION-GITSHA
+   - Push: docker push REGISTRY:VERSION-GITSHA
+   - Pull: docker pull REGISTRY:VERSION-GITSHA
