@@ -2,15 +2,11 @@ version: '3'
 services:
   invoicer:
     image: 339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer:0.3
-    ports:
-      - "3001:3001"
-      - "9229:9229"
+    network_mode: host
     environment:
-      - MONGODB_URI=mongodb://mongo:27017/invoicer
+      - MONGODB_URI=mongodb://localhost:27017/invoicer
     depends_on:
       - mongo
-    networks:
-      - app-network
 
   mongo:
     image: mongo:latest
@@ -18,11 +14,6 @@ services:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
-    networks:
-      - app-network
-
-networks:
-  app-network:
 
 volumes:
   mongodb_data:
