@@ -7,11 +7,10 @@ COPY patches /app/patches/
 COPY package.json /app/
 
 # Install dependencies and apply patches
-RUN npm install && \
-    npm run postinstall
+RUN yarn install
 
 # Copy the rest of the application
 COPY . /app/
 
 # Start the application
-CMD ["npm", "run", "dev"] 
+CMD ["yarn", "run", "dev"] 

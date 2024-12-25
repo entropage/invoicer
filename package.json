@@ -1,37 +1,64 @@
 {
   "name": "invoicer",
   "version": "1.0.0",
-  "description": "A vulnerable invoicing application",
   "main": "index.js",
+  "license": "MIT",
   "scripts": {
     "dev": "fusion dev",
-    "test": "node test/test_login.js",
-    "test:path": "python test/test_path_traversal.py",
-    "test:cmd": "python test/test_command_injection.py",
-    "test:buffer": "node test/test_buffer_fix.js",
-    "test:ssrf": "python test/test_ssrf.py",
-    "postinstall": "patch-package"
+    "test": "fusion test",
+    "build": "fusion build",
+    "build-test": "fusion build --test",
+    "start": "fusion start",
+    "lint": "eslint ."
   },
   "dependencies": {
-    "@koa/router": "^12.0.1",
-    "axios": "^1.6.5",
+    "@material-ui/core": "^4.9.5",
+    "@material-ui/icons": "^4.9.1",
     "bcryptjs": "^2.4.3",
-    "browserify-buffer": "^1.0.0",
-    "buffer": "^6.0.3",
-    "fusion-cli": "^2.0.3",
+    "date-fns": "^2.30.0",
+    "formik": "^2.4.5",
+    "fusion-cli": "^2.4.0",
     "fusion-core": "^2.0.3",
-    "fusion-plugin-react-helmet-async": "^2.0.3",
-    "fusion-plugin-react-router": "^2.0.3",
-    "fusion-react": "^3.0.3",
-    "jsonwebtoken": "^9.0.2",
+    "fusion-plugin-http-router": "^0.1.0",
+    "fusion-plugin-react-helmet-async": "^2.0.0",
+    "fusion-plugin-react-router": "^2.0.0",
+    "fusion-plugin-universal-events": "^2.0.0",
+    "fusion-react": "^3.0.0",
+    "fusion-tokens": "^2.0.0",
+    "jsonwebtoken": "^9.0.0",
     "koa-bodyparser": "^4.4.1",
-    "mongoose": "^8.0.3",
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0"
+    "mongoose": "^5.9.4",
+    "puppeteer": "^2.1.1",
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0",
+    "react-helmet-async": "^1.0.4",
+    "react-redux": "^7.2.0",
+    "redux": "^4.0.5",
+    "redux-actions": "^2.6.5"
   },
   "devDependencies": {
-    "patch-package": "^8.0.0",
-    "puppeteer": "^21.6.1"
+    "babel-eslint": "^10.1.0",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.2",
+    "eslint": "^6.8.0",
+    "eslint-config-fusion": "^6.0.0",
+    "eslint-plugin-cup": "^2.0.2",
+    "eslint-plugin-flowtype": "^4.6.0",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-jest": "^23.8.2",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-react": "^7.19.0",
+    "flow-bin": "^0.120.1",
+    "lint-staged": "^10.0.8",
+    "prettier": "^1.19.1",
+    "redux-devtools-extension": "^2.13.8",
+    "tape-cup": "^4.7.1",
+    "unitest": "^2.1.1"
   },
-  "license": "MIT"
+  "lint-staged": {
+    "*.{js,jsx}": [
+      "eslint --fix",
+      "git add"
+    ]
+  }
 }
