@@ -1,7 +1,7 @@
 version: '3'
 services:
   invoicer:
-    image: 339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer:0.3
+    image: 339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer:latest
     network_mode: host
     environment:
       - MONGODB_URI=mongodb://localhost:27017/invoicer
