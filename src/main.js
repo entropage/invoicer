@@ -1,29 +1,27 @@
 // @flow
-// Polyfills
-import './polyfills';
 
 // libs
 import App from 'fusion-react';
 import HelmetPlugin from 'fusion-plugin-react-helmet-async';
 import mongoose from 'mongoose';
 import Router from 'fusion-plugin-react-router';
-import {createPlugin} from 'fusion-core';
+import { createPlugin } from 'fusion-core';
 import bodyParser from 'koa-bodyparser';
 import bcrypt from 'bcryptjs';
 
 // src
-import {App as ClientApp} from './App';
+import { App as ClientApp } from './App';
 import handlers from './handlers';
-import {MONGODB_URI} from './constants';
-import {User} from './models/user';
+import { MONGODB_URI } from './constants';
+import { User } from './models/user';
 
 // Create plugins
 const BodyParserPlugin = createPlugin({
-  middleware: () => bodyParser()
+  middleware: () => __NODE__ && bodyParser(),
 });
 
 const HandlersPlugin = createPlugin({
-  middleware: () => handlers
+  middleware: () => handlers,
 });
 
 // Create default user
@@ -33,7 +31,7 @@ async function createDefaultUser() {
     const password = 'test123';
 
     // Check if user exists
-    const existingUser = await User.findOne({username});
+    const existingUser = await User.findOne({ username });
     if (existingUser) {
       console.log('Default user already exists');
       return;
@@ -71,7 +69,7 @@ export default function() {
         console.log('Mongodb Connected.');
         await createDefaultUser();
       })
-      .catch(err => {
+      .catch((err) => {
         console.error('MongoDB connection error:', err);
       });
 
