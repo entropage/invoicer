@@ -3,7 +3,6 @@ FROM 339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer:latest
 WORKDIR /app
 
 # Copy patch files
-COPY patches /app/patches/
 COPY package.json /app/
 
 # Install dependencies and apply patches
