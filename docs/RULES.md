@@ -74,13 +74,23 @@
    ```bash
    # Tag new version
    docker tag IMAGE_ID REGISTRY:VERSION-GITSHA
+   
+   # Also tag as latest (required for docker-compose.yml)
+   docker tag IMAGE_ID REGISTRY:latest
 
-   # Push to registry
+   # Push both tags to registry
    docker push REGISTRY:VERSION-GITSHA
+   docker push REGISTRY:latest
 
    # Pull specific version
    docker pull REGISTRY:VERSION-GITSHA
    ```
+
+6. **Tagging Rules**
+   - Always tag the latest version with both VERSION-GITSHA and :latest
+   - Push both tags to ensure docker-compose.yml works with :latest
+   - Keep version-specific tags for rollback capability
+   - Update :latest tag with each new release
 
 ## Vulnerability Implementation
 1. **SSRF (Server-Side Request Forgery)**
