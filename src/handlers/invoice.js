@@ -1,8 +1,8 @@
 // @flow
 // src
-import {createOrUpdatePerson} from './person';
-import {InvoiceModel} from '../models/Invoice';
-import {Values} from '../types';
+import { createOrUpdatePerson } from './person';
+import { InvoiceModel } from '../models/Invoice';
+import { Values } from '../types';
 import axios from 'axios';
 
 export async function createInvoice(values: Values, userId: string) {
@@ -12,10 +12,7 @@ export async function createInvoice(values: Values, userId: string) {
     return Promise.resolve(foundInvoice);
   }
 
-  const [client, seller] = await Promise.all([
-    new Person(values.client).save(),
-    new Person(values.seller).save(),
-  ]);
+  const [client, seller] = await Promise.all([createOrUpdatePerson(values.client), createOrUpdatePerson(values.seller)]);
 
   let logoData;
   if (values.invoice.logoUrl) {
@@ -38,38 +35,34 @@ export async function createInvoice(values: Values, userId: string) {
     logoData,
   })
     .save()
-    .then(invoice => invoice.save());
+    .then((invoice) => invoice.save());
 }
 
 // IDOR Vulnerability: No authorization check on invoice ID access
 export function getInvoiceById(invoiceId) {
-  return InvoiceModel.findOne({invoiceId}, {_id: 0})
-    .populate({path: 'client', select: {_id: 0}})
-    .populate({path: 'seller', select: {_id: 0}})
+  return InvoiceModel.findOne({ invoiceId }, { _id: 0 })
+    .populate({ path: 'client', select: { _id: 0 } })
+    .populate({ path: 'seller', select: { _id: 0 } })
     .lean();
 }
 
 // Get invoices for a specific user
 export function getInvoices(userId: string) {
-  return InvoiceModel.find({userId})
-    .populate({path: 'client', select: {_id: 0}})
-    .populate({path: 'seller', select: {_id: 0}})
+  return InvoiceModel.find({ userId })
+    .populate({ path: 'client', select: { _id: 0 } })
+    .populate({ path: 'seller', select: { _id: 0 } })
     .lean();
 }
 
 // IDOR Vulnerability: No authorization check on invoice updates
 export function updateInvoice(invoiceId: string, updates: Object) {
-  return InvoiceModel.findOneAndUpdate(
-    {invoiceId},
-    updates,
-    {new: true}
-  )
-  .populate({path: 'client', select: {_id: 0}})
-  .populate({path: 'seller', select: {_id: 0}})
-  .lean();
+  return InvoiceModel.findOneAndUpdate({ invoiceId }, updates, { new: true })
+    .populate({ path: 'client', select: { _id: 0 } })
+    .populate({ path: 'seller', select: { _id: 0 } })
+    .lean();
 }
 
 // IDOR Vulnerability: No authorization check on invoice deletion
 export function deleteInvoice(invoiceId: string) {
-  return InvoiceModel.findOneAndDelete({invoiceId}).lean();
+  return InvoiceModel.findOneAndDelete({ invoiceId }).lean();
 }

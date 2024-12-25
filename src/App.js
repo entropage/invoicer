@@ -1,56 +1,56 @@
 // @flow
 // libs
 import * as React from 'react';
-import {Helmet} from 'fusion-plugin-react-helmet-async';
-import {Route, Switch, Redirect} from 'fusion-plugin-react-router';
-import {split} from 'fusion-react';
+import { Helmet } from 'fusion-plugin-react-helmet-async';
+import { Route, Switch, Redirect } from 'fusion-plugin-react-router';
+import { split } from 'fusion-react';
 
 // src
-import {PageNotFound} from './containers/PageNotFound';
-import {SnackbarProvider} from './components/Snackbar';
-import {getAuthToken} from './utils';
+import { PageNotFound } from './containers/PageNotFound';
+import { SnackbarProvider } from './components/Snackbar';
+import { getAuthToken } from './utils';
 
 // Lazy load components
 const Login = split({
   defer: true,
-  load: () => import('./containers/Login/Login').then(module => ({default: module.Login})),
+  load: () => import('./containers/Login/Login').then((module) => ({ default: module.Login })),
   LoadingComponent: () => <div>Loading...</div>,
   ErrorComponent: () => <div>Error loading login page!</div>,
 });
 
 const CreateInvoice = split({
   defer: true,
-  load: () => import('./containers/CreateInvoice').then(module => ({default: module.CreateInvoice})),
+  load: () => import('./containers/CreateInvoice').then((module) => ({ default: module.CreateInvoice })),
   LoadingComponent: () => <div>Loading...</div>,
   ErrorComponent: () => <div>Error loading create invoice page!</div>,
 });
 
 const ViewInvoice = split({
   defer: true,
-  load: () => import('./containers/ViewInvoice').then(module => ({default: module.ViewInvoice})),
+  load: () => import('./containers/ViewInvoice').then((module) => ({ default: module.ViewInvoice })),
   LoadingComponent: () => <div>Loading...</div>,
   ErrorComponent: () => <div>Error loading view invoice page!</div>,
 });
 
 // Protected Route component
-const ProtectedRoute = ({component: Component, ...rest}) => {
+const ProtectedRoute = ({ component: Component, ...rest }) => {
   // For SSR, always render the component
   if (typeof window === 'undefined') {
-    return <Route {...rest} render={props => <Component {...props} />} />;
+    return <Route {...rest} render={(props) => <Component {...props} />} />;
   }
 
   // For client-side, check auth
   return (
     <Route
       {...rest}
-      render={props =>
+      render={(props) =>
         getAuthToken() ? (
           <Component {...props} />
         ) : (
           <Redirect
             to={{
               pathname: '/login',
-              state: {from: props.location},
+              state: { from: props.location },
             }}
           />
         )
@@ -63,17 +63,7 @@ export const App = (
   <React.Fragment>
     <Helmet>
       <title>React Invoicer</title>
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/icon?family=Material+Icons"
-      />
-      <script>
-        {`
-          if (typeof window !== 'undefined' && !window.Buffer) {
-            window.Buffer = require('buffer').Buffer;
-          }
-        `}
-      </script>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     </Helmet>
     <SnackbarProvider>
       <Switch>
