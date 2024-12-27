@@ -1,12 +1,23 @@
-node_modules/
-dist/
-dist-tests/
-coverage/
-.nyc_output/
+# Environment variables
+.env
 
+# Logs
+logs/
+*.log
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
 .DS_Store
-npm-debug.log
-yarn-error.log
-.vscode
-.fusion
-venv/
+Thumbs.db
