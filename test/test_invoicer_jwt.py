@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration
-API_BASE = os.getenv("API_URL", "http://localhost:3001")
+API_BASE = os.getenv("API_URL", "http://localhost:3000")
 JWT_SECRET = os.getenv("JWT_SECRET", "your-jwt-secret-key-2024")
 
 

@@ -11,7 +11,7 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 # Base URL
-BASE_URL="${API_URL:-http://localhost:3001}"
+BASE_URL="${API_URL:-http://localhost:3000}"
 
 # Function to test endpoint
 test_endpoint() {

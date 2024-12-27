@@ -1,14 +1,4 @@
-version: '3'
 services:
-  invoicer:
-    image: 339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer:latest
-    ports:
-      - "3001:3000"
-    environment:
-      - MONGODB_URI=mongodb://mongo:27017/invoicer
-    depends_on:
-      - mongo
-
   mongo:
     image: mongo:latest
     ports:
@@ -16,5 +6,18 @@ services:
     volumes:
       - mongodb_data:/data/db
 
+  mysql:
+    image: mysql:lts
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpass123
+      - MYSQL_DATABASE=invoicer
+      - MYSQL_USER=invoicer
+      - MYSQL_PASSWORD=invoicer123
+    volumes:
+      - mysql_data:/var/lib/mysql
+
 volumes:
   mongodb_data:
+  mysql_data:

@@ -45,17 +45,18 @@ The application has path traversal vulnerabilities in:
 
 1. Install Docker and Docker Compose
 2. Create a `docker-compose.yml` file with:
+
 ```yaml
-version: '3'
+version: "3"
 services:
   invoicer:
     image: 339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer:0.3
     ports:
-      - "3001:3001"
+      - "3000:3000"
       - "9229:9229"
     environment:
       - NODE_ENV=development
-      - PORT=3001
+      - PORT=3000
       - DEBUG=*
       - MONGODB_URI=mongodb://mongodb:27017/invoicer
     depends_on:
@@ -71,8 +72,9 @@ services:
 volumes:
   mongodb_data:
 ```
+
 3. Run `docker-compose up -d`
-4. The application will be available at http://localhost:3001
+4. The application will be available at http://localhost:3000
 
 ### Building from Source
 
@@ -90,12 +92,14 @@ volumes:
 ### Setup Test Environment
 
 1. Create a Python virtual environment:
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
 2. Install test dependencies:
+
 ```bash
 cd test
 pip install -r requirements.txt
@@ -104,31 +108,37 @@ pip install -r requirements.txt
 ### Running Tests
 
 1. Command Injection Tests:
+
 ```bash
 python test_command_injection.py
 ```
 
 2. Path Traversal Tests:
+
 ```bash
 python test_path_traversal.py
 ```
 
 3. IDOR Tests:
+
 ```bash
 python test_idor.py
 ```
 
 4. JWT Authentication Tests:
+
 ```bash
 python test_invoicer_jwt.py
 ```
 
 5. Basic Functionality Tests:
+
 ```bash
 python test_invoicer.py
 ```
 
 6. Login Tests:
+
 ```bash
 node test_login.js
 ```

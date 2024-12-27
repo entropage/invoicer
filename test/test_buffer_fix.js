@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 require('dotenv').config();
 
-const API_URL = process.env.API_URL || 'http://localhost:3001';
+const API_URL = process.env.API_URL || 'http://localhost:3000';
 
 async function testBrowserErrors() {
   console.log('Starting browser error check...');

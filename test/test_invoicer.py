@@ -9,7 +9,7 @@ load_dotenv()
 
 
 def test_invoicer(base_url=None):
-    base_url = base_url or os.getenv("API_URL", "http://localhost:3001")
+    base_url = base_url or os.getenv("API_URL", "http://localhost:3000")
     print(f"\nTesting invoicer at {base_url}")
 
     # Test GET /api/invoice/all

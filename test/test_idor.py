@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-BASE_URL = os.getenv("API_URL", "http://localhost:3001") + "/api"
+BASE_URL = os.getenv("API_URL", "http://localhost:3000") + "/api"
 
 
 class InvoicerClient:

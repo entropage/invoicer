@@ -11,7 +11,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration
-BASE_URL = os.getenv("API_URL", "http://localhost:3001")  # Local development server
+BASE_URL = os.getenv("API_URL", "http://localhost:3000")  # Local development server
 TIMEOUT = 5  # seconds
 
 
