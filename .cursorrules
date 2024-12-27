@@ -8,6 +8,9 @@
 - Use built in fusion.js features as much as possible
 - Use koa which is native to fusion.js
 - Don't modify core files (Dockerfile, docker-compose.yml, package.json)
+- Always use scripts under devops/ directory for build/run/test operations
+- Always check operation results via logs under logs/ directory
+- Always update or create documentation under doc/ when progress is made
 
 # Directory and Command Execution Rules
 1. Always check current working directory with 'pwd' before executing directory-dependent commands
