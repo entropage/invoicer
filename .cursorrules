@@ -1,7 +1,15 @@
-<<<<<<< HEAD
-# Cursor AI Automation Rules
+# Project Rules and Guidelines
 
-# Directory handling rules
+# Core Project Rules
+- This is an educational project, don't try to fix the security vulnerabilities, we need them for POCs to work
+- When creating new files, check if the file already exists in the project
+- Don't ever use express.js, use fusion.js instead
+- Don't introduce new dependencies unless it's absolutely necessary
+- Use built in fusion.js features as much as possible
+- Use koa which is native to fusion.js
+- Don't modify core files (Dockerfile, docker-compose.yml, package.json)
+
+# Directory and Command Execution Rules
 1. Always check current working directory with 'pwd' before executing directory-dependent commands
 2. Never use relative paths without first verifying current directory
 3. Use absolute paths when working across different directories
@@ -13,49 +21,13 @@
 9. When in doubt about location, use 'pwd' to verify
 10. Use command output to determine next directory operation
 
-# Command execution rules
-1. Always check command prerequisites before execution
-2. Verify tool/command availability before use
-3. Use full paths for critical operations
-4. Document directory assumptions for each command
-5. Log directory changes for debugging
-
-# Error handling rules
-1. Check exit codes after critical operations
-2. Provide fallback paths for failed directory changes
-3. Validate paths before operations
-4. Handle path-related errors gracefully
-5. Log directory-related errors
-
-# Best practices for automation
-1. Use path variables instead of hardcoded paths
-2. Maintain a consistent directory structure
-3. Document directory dependencies
-4. Use directory guards for critical operations
-5. Implement path validation functions
-
-# Project automation constraints
-1. Don't fix security vulnerabilities (educational project)
-2. Don't modify core files (Dockerfile, docker-compose.yml, package.json)
-3. Use yarn with --verbose flag
-4. Activate venv before Python operations
-5. Use docker-compose up -d for shell access
-6. Check docs/RULES.md for full project guidelines
-=======
-# Project Rules
-- This is an educational project, don't try to fix the security vulnerabilities, we need them for POCs to work
-- When creating new files, check if the file already exists in the project
-- Don't ever use express.js, use fusion.js instead
-- Don't introduce new dependencies unless it's absolutely necessary
-- Use built in fusion.js features as much as possible
-- Use koa which is native to fusion.js
+# Docker and Container Rules
 - Always use "docker-compose up -d" instead of "docker-compose up", to ensure you always have shell
-- Always run 'pwd' before running any commands that has dependency on the current working directory
 - Always use 'docker build' instead of 'docker compose build'
-- Always use 'source venv/bin/activate' before running python scripts
+- Use yarn with --verbose flag
+- Always run 'source venv/bin/activate' before running python scripts
 
 # Docker Image Versioning Rules
-
 1. Version Format: MAJOR.MINOR
    - MAJOR: Breaking changes
    - MINOR: New features or non-breaking changes
@@ -88,4 +60,16 @@
    - Push to all required registries
    - Document changes in version history
 
->>>>>>> 98c4d9f (Updated .cursorrules with versioning rules and version history)
+# Error Handling Rules
+1. Check exit codes after critical operations
+2. Provide fallback paths for failed directory changes
+3. Validate paths before operations
+4. Handle path-related errors gracefully
+5. Log directory-related errors
+
+# Best Practices for Automation
+1. Use path variables instead of hardcoded paths
+2. Maintain a consistent directory structure
+3. Document directory dependencies
+4. Use directory guards for critical operations
+5. Implement path validation functions
