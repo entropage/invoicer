@@ -1,4 +1,7 @@
 const puppeteer = require('puppeteer');
+require('dotenv').config();
+
+const API_URL = process.env.API_URL || 'http://localhost:3001';
 
 async function testBrowserErrors() {
   console.log('Starting browser error check...');
@@ -9,7 +12,7 @@ async function testBrowserErrors() {
 
   try {
     const page = await browser.newPage();
-    
+
     // Enable console log collection
     page.on('console', msg => {
       if (msg.type() === 'error') {
@@ -19,7 +22,7 @@ async function testBrowserErrors() {
 
     // Navigate to login page
     console.log('Navigating to login page...');
-    await page.goto('http://10.0.0.105:3001/login', {
+    await page.goto(`${API_URL}/login`, {
       waitUntil: 'networkidle0',
       timeout: 30000
     });
@@ -39,4 +42,4 @@ async function testBrowserErrors() {
   }
 }
 
-testBrowserErrors(); 
+testBrowserErrors();

@@ -1,9 +1,16 @@
-import requests
 import json
+import os
 import time
 from typing import Dict, Optional
 
-BASE_URL = "http://10.0.0.105:3001/api"
+import requests
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+BASE_URL = os.getenv("API_URL", "http://localhost:3001") + "/api"
+
 
 class InvoicerClient:
     def __init__(self, username: str, password: str):
@@ -17,7 +24,7 @@ class InvoicerClient:
         try:
             response = requests.post(
                 f"{BASE_URL}/auth/register",
-                json={"username": self.username, "password": self.password}
+                json={"username": self.username, "password": self.password},
             )
             return response.status_code == 200
         except:
@@ -28,7 +35,7 @@ class InvoicerClient:
         try:
             response = requests.post(
                 f"{BASE_URL}/auth/login",
-                json={"username": self.username, "password": self.password}
+                json={"username": self.username, "password": self.password},
             )
             if response.status_code == 200:
                 data = response.json()
@@ -44,7 +51,7 @@ class InvoicerClient:
         """Get headers with auth token"""
         return {
             "Authorization": f"Bearer {self.token}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
     def create_invoice(self, invoice_id: str, amount: float) -> Optional[Dict]:
@@ -57,26 +64,24 @@ class InvoicerClient:
                     {
                         "description": f"Test Item for {self.username}",
                         "quantity": 1,
-                        "unitPrice": amount
+                        "unitPrice": amount,
                     }
-                ]
+                ],
             },
             "client": {
                 "name": "Test Client",
                 "email": "client@test.com",
-                "address": "123 Client St"
+                "address": "123 Client St",
             },
             "seller": {
                 "name": "Test Seller",
                 "email": "seller@test.com",
-                "address": "456 Seller Ave"
-            }
+                "address": "456 Seller Ave",
+            },
         }
         try:
             response = requests.post(
-                f"{BASE_URL}/invoice",
-                headers=self.headers,
-                json=data
+                f"{BASE_URL}/invoice", headers=self.headers, json=data
             )
             if response.status_code == 200:
                 return response.json()
@@ -88,8 +93,7 @@ class InvoicerClient:
         """Get a specific invoice"""
         try:
             response = requests.get(
-                f"{BASE_URL}/invoice/{invoice_id}",
-                headers=self.headers
+                f"{BASE_URL}/invoice/{invoice_id}", headers=self.headers
             )
             if response.status_code == 200:
                 return response.json()
@@ -101,18 +105,12 @@ class InvoicerClient:
         """Update an invoice"""
         data = {
             "items": [
-                {
-                    "description": "Updated Item",
-                    "quantity": 1,
-                    "unitPrice": new_amount
-                }
+                {"description": "Updated Item", "quantity": 1, "unitPrice": new_amount}
             ]
         }
         try:
             response = requests.put(
-                f"{BASE_URL}/invoice/{invoice_id}",
-                headers=self.headers,
-                json=data
+                f"{BASE_URL}/invoice/{invoice_id}", headers=self.headers, json=data
             )
             if response.status_code == 200:
                 return response.json()
@@ -124,8 +122,7 @@ class InvoicerClient:
         """Delete an invoice"""
         try:
             response = requests.delete(
-                f"{BASE_URL}/invoice/{invoice_id}",
-                headers=self.headers
+                f"{BASE_URL}/invoice/{invoice_id}", headers=self.headers
             )
             if response.status_code == 200:
                 return response.json()
@@ -136,21 +133,20 @@ class InvoicerClient:
     def list_invoices(self) -> Optional[Dict]:
         """List all invoices for the user"""
         try:
-            response = requests.get(
-                f"{BASE_URL}/invoice/all",
-                headers=self.headers
-            )
+            response = requests.get(f"{BASE_URL}/invoice/all", headers=self.headers)
             if response.status_code == 200:
                 return response.json()
         except:
             pass
         return None
 
+
 def print_step(step_num: int, description: str):
     """Print a step header"""
     print(f"\n{'-' * 80}")
     print(f"Step {step_num}: {description}")
     print(f"{'-' * 80}")
+
 
 def print_result(title: str, data: Optional[Dict]):
     """Print a result with proper formatting"""
@@ -159,6 +155,7 @@ def print_result(title: str, data: Optional[Dict]):
         print(json.dumps(data, indent=2))
     else:
         print("No data or operation failed")
+
 
 def test_idor():
     # Create two users
@@ -224,5 +221,6 @@ def test_idor():
     bob.delete_invoice(bob_invoice_id)
     print("Test completed!")
 
+
 if __name__ == "__main__":
-    test_idor() 
+    test_idor()

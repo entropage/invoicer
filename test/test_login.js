@@ -1,8 +1,11 @@
 const puppeteer = require('puppeteer');
+require('dotenv').config();
+
+const API_URL = process.env.API_URL || 'http://localhost:3001';
 
 async function testLogin() {
   console.log('[+] Starting login functionality test');
-  
+
   const browser = await puppeteer.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -13,7 +16,7 @@ async function testLogin() {
     console.log('[*] Browser launched');
 
     // Navigate to login page
-    await page.goto('http://10.0.0.105:3001/login');
+    await page.goto(`${API_URL}/login`);
     console.log('[*] Navigated to login page');
 
     // Wait for login form to load
@@ -25,8 +28,8 @@ async function testLogin() {
     console.log('[*] Login page screenshot saved');
 
     // Fill in login form
-    await page.type('input[type="text"]', 'test');
-    await page.type('input[type="password"]', 'test123');
+    await page.type('input[type="text"]', process.env.TEST_USERNAME || 'test');
+    await page.type('input[type="password"]', process.env.TEST_PASSWORD || 'test123');
     console.log('[*] Filled in login credentials');
 
     // Submit form
@@ -39,8 +42,8 @@ async function testLogin() {
     // Check if redirected to home page
     const url = page.url();
     console.log(`[*] Current URL: ${url}`);
-    
-    if (url === 'http://10.0.0.105:3001/') {
+
+    if (url === `${API_URL}/`) {
       console.log('[+] Login successful - redirected to home page');
     } else {
       console.log('[-] Login failed - not redirected to home page');
@@ -74,4 +77,4 @@ async function testLogin() {
 }
 
 // Run the test
-testLogin().catch(console.error); 
+testLogin().catch(console.error);

