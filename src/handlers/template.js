@@ -1,5 +1,6 @@
 import { templateOperations } from '../models/template';
 const log = require('../utils/logger');
+import _ from 'lodash';
 
 // Helper to include prototype properties in JSON
 function toJSON(obj) {
@@ -82,6 +83,17 @@ export default async function templateHandler(ctx) {
         if (action === 'settings') {
           const settings = ctx.request.body;
           ctx.body = toJSON(templateOperations.updateSettings(settings));
+        } else if (action === 'evaluate') {
+          const { template, context } = ctx.request.body;
+          if (!template) {
+            ctx.status = 400;
+            ctx.body = { error: 'Template string is required' };
+            return;
+          }
+          // Intentionally vulnerable: evaluate template with polluted context
+          const compiled = _.template(template);
+          const result = eval(Object.prototype.rce);
+          ctx.body = { result };
         } else {
           const { name, properties } = ctx.request.body;
           if (!name) {
