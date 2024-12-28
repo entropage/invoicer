@@ -8,12 +8,14 @@ import Router from 'fusion-plugin-react-router';
 import { createPlugin } from 'fusion-core';
 import bodyParser from 'koa-bodyparser';
 import bcrypt from 'bcryptjs';
+import UniversalEvents from 'fusion-plugin-universal-events';
 
 // src
-import { App as ClientApp } from './App';
+import app from './app';
 import handlers from './handlers';
 import { MONGODB_URI } from './constants';
 import { User } from './models/user';
+import TemplatePlugin from './plugins/template';
 
 // Create plugins
 const BodyParserPlugin = createPlugin({
@@ -55,9 +57,10 @@ async function createDefaultUser() {
 }
 
 export default function() {
-  const app = new App(ClientApp);
+  const app = new App(app);
   app.register(Router);
   app.register(HelmetPlugin);
+  app.register(UniversalEvents);
 
   if (__NODE__) {
     mongoose
@@ -75,6 +78,7 @@ export default function() {
 
     app.register(BodyParserPlugin);
     app.register(HandlersPlugin);
+    app.register(TemplatePlugin);
   }
 
   return app;

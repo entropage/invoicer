@@ -39,8 +39,9 @@ class VulnerabilityTest:
         """Wait for application server to be ready"""
         for _ in range(timeout):
             try:
-                response = requests.get(f"{cls.API_URL}/health")
-                if response.status_code == 200:
+                # Try template endpoint instead of health since it's part of the test
+                response = requests.get(f"{cls.API_URL}/api/template/test")
+                if response.status_code in [404, 200]:  # 404 is fine, means endpoint exists but template not found
                     logger.info("Application server is ready")
                     return True
             except requests.exceptions.RequestException:

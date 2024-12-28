@@ -9,201 +9,177 @@ import settingsHandler from './settings';
 
 const router = new Router();
 
-export default async (ctx, next) => {
-  const {method, path} = ctx;
-  
-  // Template routes - Vulnerable to prototype pollution
-  if (path.startsWith('/api/template')) {
-    await templateHandler(ctx);
-    return;
-  }
+// Health check endpoint
+router.get('/health', async (ctx) => {
+  ctx.body = {status: 'ok'};
+});
 
-  // Settings routes - Vulnerable to prototype pollution
-  if (path.startsWith('/api/settings')) {
-    await settingsHandler(ctx);
-    return;
-  }
+// Template routes
+router.all('/api/template(.*)', templateHandler);
 
-  if (path === '/api/auth/login' && method === 'POST') {
-    try {
-      const result = await login(ctx);
-      ctx.body = result;
-    } catch (error) {
-      ctx.status = 500;
-      ctx.body = {error: error.message};
+// Settings routes
+router.all('/api/settings(.*)', settingsHandler);
+
+// Auth routes
+router.post('/api/auth/login', async (ctx) => {
+  try {
+    const result = await login(ctx);
+    ctx.body = result;
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {error: error.message};
+  }
+});
+
+router.post('/api/auth/register', async (ctx) => {
+  try {
+    const result = await register(ctx);
+    ctx.body = result;
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {error: error.message};
+  }
+});
+
+// Invoice routes
+router.get('/api/invoice/all', async (ctx) => {
+  try {
+    const token = ctx.headers.authorization?.replace('Bearer ', '');
+    const user = await verifyToken(token);
+    const invoices = await getInvoices(user.id);
+    ctx.body = invoices;
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {error: error.message};
+  }
+});
+
+router.get('/api/invoice/:id', async (ctx) => {
+  try {
+    const token = ctx.headers.authorization?.replace('Bearer ', '');
+    await verifyToken(token);
+    const invoice = await getInvoiceById(ctx.params.id);
+    if (!invoice) {
+      ctx.status = 404;
+      ctx.body = {error: 'Invoice not found'};
+      return;
     }
-    return;
+    ctx.body = invoice;
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {error: error.message};
   }
+});
 
-  if (path === '/api/auth/register' && method === 'POST') {
-    try {
-      const result = await register(ctx);
-      ctx.body = result;
-    } catch (error) {
-      ctx.status = 500;
-      ctx.body = {error: error.message};
+router.post('/api/invoice', async (ctx) => {
+  try {
+    const token = ctx.headers.authorization?.replace('Bearer ', '');
+    const user = await verifyToken(token);
+    const invoice = await createInvoice(ctx.request.body, user.id);
+    ctx.body = invoice;
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {error: error.message};
+  }
+});
+
+router.put('/api/invoice/:id', async (ctx) => {
+  try {
+    const token = ctx.headers.authorization?.replace('Bearer ', '');
+    await verifyToken(token);
+    const invoice = await updateInvoice(ctx.params.id, ctx.request.body);
+    if (!invoice) {
+      ctx.status = 404;
+      ctx.body = {error: 'Invoice not found'};
+      return;
     }
-    return;
+    ctx.body = invoice;
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {error: error.message};
   }
+});
 
-  // Invoice routes - Only getInvoices is properly protected
-  if (path === '/api/invoice/all' && method === 'GET') {
-    try {
-      const token = ctx.headers.authorization?.replace('Bearer ', '');
-      const user = await verifyToken(token);
-      const invoices = await getInvoices(user.id);
-      ctx.body = invoices;
-    } catch (error) {
-      ctx.status = 500;
-      ctx.body = {error: error.message};
+router.delete('/api/invoice/:id', async (ctx) => {
+  try {
+    const token = ctx.headers.authorization?.replace('Bearer ', '');
+    await verifyToken(token);
+    const invoice = await deleteInvoice(ctx.params.id);
+    if (!invoice) {
+      ctx.status = 404;
+      ctx.body = {error: 'Invoice not found'};
+      return;
     }
-    return;
+    ctx.body = {message: 'Invoice deleted successfully'};
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {error: error.message};
   }
+});
 
-  // IDOR Vulnerability: No user check on specific invoice access
-  if (path.startsWith('/api/invoice/') && method === 'GET' && path !== '/api/invoice/all') {
-    try {
-      const token = ctx.headers.authorization?.replace('Bearer ', '');
-      await verifyToken(token);
-      const invoiceId = path.split('/')[3];
-      const invoice = await getInvoiceById(invoiceId);
-      if (!invoice) {
-        ctx.status = 404;
-        ctx.body = {error: 'Invoice not found'};
-        return;
-      }
-      ctx.body = invoice;
-    } catch (error) {
-      ctx.status = 500;
-      ctx.body = {error: error.message};
-    }
-    return;
+// File routes
+router.get('/api/file/read', async (ctx) => {
+  try {
+    await readFile(ctx);
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {error: error.message};
   }
+});
 
-  if (path === '/api/invoice' && method === 'POST') {
-    try {
-      const token = ctx.headers.authorization?.replace('Bearer ', '');
-      const user = await verifyToken(token);
-      const invoice = await createInvoice(ctx.request.body, user.id);
-      ctx.body = invoice;
-    } catch (error) {
-      ctx.status = 500;
-      ctx.body = {error: error.message};
-    }
-    return;
+router.get('/api/file/secure-read', async (ctx) => {
+  try {
+    await readFileSecure(ctx);
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {error: error.message};
   }
+});
 
-  // IDOR Vulnerability: No ownership check on update
-  if (path.startsWith('/api/invoice/') && method === 'PUT') {
-    try {
-      const token = ctx.headers.authorization?.replace('Bearer ', '');
-      await verifyToken(token);
-      const invoiceId = path.split('/')[3];
-      const invoice = await updateInvoice(invoiceId, ctx.request.body);
-      if (!invoice) {
-        ctx.status = 404;
-        ctx.body = {error: 'Invoice not found'};
-        return;
-      }
-      ctx.body = invoice;
-    } catch (error) {
-      ctx.status = 500;
-      ctx.body = {error: error.message};
-    }
-    return;
+router.get('/api/file/template', async (ctx) => {
+  try {
+    await getPdfTemplate(ctx);
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {error: error.message};
   }
+});
 
-  // IDOR Vulnerability: No ownership check on delete
-  if (path.startsWith('/api/invoice/') && method === 'DELETE') {
-    try {
-      const token = ctx.headers.authorization?.replace('Bearer ', '');
-      await verifyToken(token);
-      const invoiceId = path.split('/')[3];
-      const invoice = await deleteInvoice(invoiceId);
-      if (!invoice) {
-        ctx.status = 404;
-        ctx.body = {error: 'Invoice not found'};
-        return;
-      }
-      ctx.body = {message: 'Invoice deleted successfully'};
-    } catch (error) {
-      ctx.status = 500;
-      ctx.body = {error: error.message};
-    }
-    return;
+// System routes
+router.get('/api/system/exec', async (ctx) => {
+  try {
+    await executeCommand(ctx);
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {error: error.message};
   }
+});
 
-  // Vulnerable file endpoints
-  if (path === '/api/file/read' && method === 'GET') {
-    try {
-      await readFile(ctx);
-    } catch (error) {
-      ctx.status = 500;
-      ctx.body = {error: error.message};
-    }
-    return;
+router.get('/api/system/pdf', async (ctx) => {
+  try {
+    await generatePdfReport(ctx);
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {error: error.message};
   }
+});
 
-  if (path === '/api/file/secure-read' && method === 'GET') {
-    try {
-      await readFileSecure(ctx);
-    } catch (error) {
-      ctx.status = 500;
-      ctx.body = {error: error.message};
-    }
-    return;
+router.get('/api/system/ping', async (ctx) => {
+  try {
+    await checkConnection(ctx);
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {error: error.message};
   }
+});
 
-  if (path === '/api/file/template' && method === 'GET') {
-    try {
-      await getPdfTemplate(ctx);
-    } catch (error) {
-      ctx.status = 500;
-      ctx.body = {error: error.message};
-    }
-    return;
+router.get('/api/system/info', async (ctx) => {
+  try {
+    await getSystemInfo(ctx);
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = {error: error.message};
   }
+});
 
-  // Command injection endpoints
-  if (path === '/api/system/exec' && method === 'GET') {
-    try {
-      await executeCommand(ctx);
-    } catch (error) {
-      ctx.status = 500;
-      ctx.body = {error: error.message};
-    }
-    return;
-  }
-
-  if (path === '/api/system/pdf' && method === 'GET') {
-    try {
-      await generatePdfReport(ctx);
-    } catch (error) {
-      ctx.status = 500;
-      ctx.body = {error: error.message};
-    }
-    return;
-  }
-
-  if (path === '/api/system/ping' && method === 'GET') {
-    try {
-      await checkConnection(ctx);
-    } catch (error) {
-      ctx.status = 500;
-      ctx.body = {error: error.message};
-    }
-    return;
-  }
-
-  if (path === '/api/system/info' && method === 'GET') {
-    try {
-      await getSystemInfo(ctx);
-    } catch (error) {
-      ctx.status = 500;
-      ctx.body = {error: error.message};
-    }
-    return;
-  }
-
-  await next();
-};
+export default router.routes();
