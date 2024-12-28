@@ -18,7 +18,7 @@ load_dotenv()
 
 # Configuration from environment
 API_URL = os.getenv('API_URL', 'http://localhost:3001')
-TEST_PORT = int(os.getenv('TEST_PORT', '8888'))
+TEST_PORT = int(os.getenv('TEST_PORT', '8890'))
 TEST_USERNAME = os.getenv('TEST_USERNAME', 'test')
 TEST_PASSWORD = os.getenv('TEST_PASSWORD', 'test123')
 
