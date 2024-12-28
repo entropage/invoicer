@@ -1,8 +1,7 @@
-FROM 339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer:latest
+FROM invoicer:0.7-3f1a721
 WORKDIR /app
-COPY package.json ./
+COPY package.json yarn.lock ./
 COPY src/ ./src/
-RUN yarn install --production
-ENV NODE_ENV=production
+RUN yarn install
 ENV DEBUG=app:*
-CMD ["yarn", "run", "dev"]
+CMD ["yarn", "dev"]
