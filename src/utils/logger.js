@@ -3,7 +3,7 @@ const path = require('path');
 
 // Create logs directory if it doesn't exist
 const logsDir = path.join(__dirname, '../../logs');
-if (!fs.existsSync(logsDir)) {
+if (__NODE__ && !fs.existsSync(logsDir)) {
   fs.mkdirSync(logsDir);
 }
 
@@ -15,7 +15,7 @@ const logFile = path.join(logsDir, `app-${timestamp}.log`);
 function writeLog(level, message, data = null) {
   const timestamp = new Date().toISOString();
   let logMessage = `[${timestamp}] [${level}] ${message}`;
-  
+
   if (data) {
     logMessage += '\n' + JSON.stringify(data, null, 2);
   }
@@ -25,7 +25,7 @@ function writeLog(level, message, data = null) {
   console.log(logMessage);
 
   // Write to file
-  fs.appendFileSync(logFile, logMessage);
+  __NODE__ && fs.appendFileSync(logFile, logMessage);
 }
 
 module.exports = {
@@ -33,5 +33,5 @@ module.exports = {
   info: (message) => writeLog('INFO', message),
   warn: (message) => writeLog('WARN', message),
   error: (message) => writeLog('ERROR', message),
-  object: (label, obj) => writeLog('OBJECT', label, obj)
-}; 
+  object: (label, obj) => writeLog('OBJECT', label, obj),
+};

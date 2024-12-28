@@ -8,10 +8,11 @@ import Router from 'fusion-plugin-react-router';
 import { createPlugin } from 'fusion-core';
 import bodyParser from 'koa-bodyparser';
 import bcrypt from 'bcryptjs';
-import UniversalEvents from 'fusion-plugin-universal-events';
+import UniversalEvents, { UniversalEventsToken } from 'fusion-plugin-universal-events';
+import { FetchToken } from 'fusion-tokens';
 
 // src
-import app from './app';
+import { App as root } from './App';
 import handlers from './handlers';
 import { MONGODB_URI } from './constants';
 import { User } from './models/user';
@@ -57,10 +58,11 @@ async function createDefaultUser() {
 }
 
 export default function() {
-  const app = new App(app);
+  const app = new App(root);
   app.register(Router);
   app.register(HelmetPlugin);
-  app.register(UniversalEvents);
+  app.register(UniversalEventsToken, UniversalEvents);
+  __BROWSER__ && app.register(FetchToken, window.fetch);
 
   if (__NODE__) {
     mongoose
