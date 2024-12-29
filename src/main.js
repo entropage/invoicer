@@ -17,6 +17,8 @@ import handlers from './handlers';
 import { MONGODB_URI } from './constants';
 import { User } from './models/user';
 import TemplatePlugin from './plugins/template';
+import XMLParserPlugin from './plugins/xml-parser';
+import InvoicePlugin from './handlers/invoice';
 
 // Create plugins
 const BodyParserPlugin = createPlugin({
@@ -65,6 +67,9 @@ export default function() {
   __BROWSER__ && app.register(FetchToken, window.fetch);
 
   if (__NODE__) {
+    // Set port to 3000 to match test expectations
+    process.env.PORT = '3000';
+
     mongoose
       .connect(MONGODB_URI, {
         useNewUrlParser: true,
@@ -81,6 +86,8 @@ export default function() {
     app.register(BodyParserPlugin);
     app.register(HandlersPlugin);
     app.register(TemplatePlugin);
+    app.register(XMLParserPlugin);
+    app.register(InvoicePlugin);
   }
 
   return app;

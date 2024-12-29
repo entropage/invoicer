@@ -6,58 +6,7 @@ import { InvoiceModel } from '../models/Invoice';
 import { Values } from '../types';
 import axios from 'axios';
 
-export default createPlugin({
-  middleware: () => async (ctx, next) => {
-    if (ctx.path === '/api/invoice/import/xml' && ctx.method === 'POST') {
-      try {
-        console.log('Received XML import request');
-        const xmlString = ctx.request.body;
-        console.log('XML String:', xmlString);
-
-        if (!xmlString) {
-          throw new Error('No XML data provided');
-        }
-
-        const xmlDoc = ctx.xmlParser.parseXML(xmlString);
-        console.log('XML parsed successfully');
-        
-        // Extract invoice data from XML
-        const customerNode = xmlDoc.get('//customer');
-        if (!customerNode) {
-          throw new Error('Customer node not found in XML');
-        }
-        const customer = customerNode.text();
-        
-        const itemNodes = xmlDoc.find('//item');
-        if (!itemNodes || itemNodes.length === 0) {
-          throw new Error('No item nodes found in XML');
-        }
-        const items = itemNodes.map(item => item.text());
-        
-        console.log('Extracted data:', { customer, items });
-        
-        ctx.body = {
-          success: true,
-          data: {
-            customer,
-            items
-          }
-        };
-        ctx.status = 200;
-      } catch (error) {
-        console.error('XML parsing error:', error);
-        ctx.status = 500;
-        ctx.body = {
-          success: false,
-          error: error.message
-        };
-      }
-      return;
-    }
-    return next();
-  }
-});
-
+// Export all the functions first
 export async function createInvoice(values /*: Values */, userId /*: string */) {
   const foundInvoice = await getInvoiceById(values.invoice.invoiceId);
 
@@ -91,7 +40,6 @@ export async function createInvoice(values /*: Values */, userId /*: string */) 
     .then((invoice) => invoice.save());
 }
 
-// IDOR Vulnerability: No authorization check on invoice ID access
 export function getInvoiceById(invoiceId) {
   return InvoiceModel.findOne({ invoiceId }, { _id: 0 })
     .populate({ path: 'client', select: { _id: 0 } })
@@ -99,7 +47,6 @@ export function getInvoiceById(invoiceId) {
     .lean();
 }
 
-// Get invoices for a specific user
 export function getInvoices(userId /*: string */) {
   return InvoiceModel.find({ userId })
     .populate({ path: 'client', select: { _id: 0 } })
@@ -107,7 +54,6 @@ export function getInvoices(userId /*: string */) {
     .lean();
 }
 
-// IDOR Vulnerability: No authorization check on invoice updates
 export function updateInvoice(invoiceId /*: string */, updates /*: Object */) {
   return InvoiceModel.findOneAndUpdate({ invoiceId }, updates, { new: true })
     .populate({ path: 'client', select: { _id: 0 } })
@@ -115,7 +61,77 @@ export function updateInvoice(invoiceId /*: string */, updates /*: Object */) {
     .lean();
 }
 
-// IDOR Vulnerability: No authorization check on invoice deletion
 export function deleteInvoice(invoiceId /*: string */) {
   return InvoiceModel.findOneAndDelete({ invoiceId }).lean();
 }
+
+// Create and export the plugin with XML handling
+const plugin = createPlugin({
+  middleware: () => async (ctx, next) => {
+    // Handle XML import endpoint
+    if (ctx.path === '/api/invoice/import/xml' && ctx.method === 'POST') {
+      try {
+        console.log('Received XML import request');
+        const xmlString = ctx.request.body;
+        console.log('XML String:', xmlString);
+
+        if (!xmlString) {
+          throw new Error('No XML data provided');
+        }
+
+        // Vulnerable: Using parseXML with dangerous options
+        const xmlDoc = ctx.xmlParser.parseXML(xmlString);
+        console.log('XML parsed successfully');
+        
+        // Vulnerable: Extract and process ALL nodes including external entities
+        const allNodes = xmlDoc.root().childNodes();
+        const extractedData = {
+          customer: '',
+          items: []
+        };
+        
+        allNodes.forEach(node => {
+          if (node.type() === 'element') {
+            if (node.name() === 'customer') {
+              extractedData.customer = node.text();
+            } else if (node.name() === 'items') {
+              // Extract items and their content
+              node.childNodes().forEach(itemNode => {
+                if (itemNode.type() === 'element' && itemNode.name() === 'item') {
+                  extractedData.items.push(itemNode.text());
+                }
+              });
+            }
+          }
+        });
+        
+        console.log('Extracted data:', extractedData);
+        
+        // Vulnerable: Return all extracted data in response
+        ctx.body = {
+          success: true,
+          data: extractedData,
+          debug: {
+            xmlString,
+            parsedXml: xmlDoc.toString()
+          }
+        };
+        ctx.status = 200;
+      } catch (error) {
+        // Vulnerable: Return detailed error information
+        console.error('XML parsing error:', error);
+        ctx.status = 500;
+        ctx.body = {
+          success: false,
+          error: error.message,
+          stack: error.stack,
+          xmlString: ctx.request.body
+        };
+      }
+      return;
+    }
+    return next();
+  }
+});
+
+export default plugin;
