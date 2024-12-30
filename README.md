@@ -39,6 +39,28 @@ The application has path traversal vulnerabilities in:
 - `/api/file/read` - Allows reading files outside the intended directory
 - `/api/file/template` - Allows accessing templates outside the intended directory
 
+### 5. SQL Injection
+
+The application includes intentional SQL injection vulnerabilities in its MySQL-based features:
+
+| Vulnerability Type | Endpoint                         | Source File                      | Description                                    | Example Payload                                                     |
+| ------------------ | -------------------------------- | -------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------- |
+| Search-based SQLi  | `GET /mysql/search?query=`       | `src/handlers/mysql-handlers.js` | Vulnerable string concatenation in LIKE clause | `' OR '1'='1`                                                       |
+| Union-based SQLi   | `GET /mysql/credit?customer_id=` | `src/handlers/mysql-handlers.js` | Direct parameter injection in WHERE clause     | `0 UNION SELECT 999999`                                             |
+| Error-based SQLi   | `POST /mysql/order`              | `src/handlers/mysql-handlers.js` | Multiple injection points in INSERT statement  | `{"customer_id": "1 OR 1=1", "notes": "'); DROP TABLE Orders; --"}` |
+
+For comparison, the application also includes a safe endpoint (`/mysql/safe-search`) that uses proper ORM methods to prevent SQL injection.
+
+Test files:
+
+- Main test file: `test/test_sqli.py`
+- Integration tests: `test/test_all.py`
+
+Source files:
+
+- Models: `src/models/mysql.js`
+- Handlers: `src/handlers/mysql-handlers.js`
+
 ## Running the Application
 
 ### Using Pre-built Image (Recommended)
@@ -131,16 +153,28 @@ python test_idor.py
 python test_invoicer_jwt.py
 ```
 
-5. Basic Functionality Tests:
+5. SQL Injection Tests:
+
+```bash
+python test_sqli.py
+```
+
+6. Basic Functionality Tests:
 
 ```bash
 python test_invoicer.py
 ```
 
-6. Login Tests:
+7. Login Tests:
 
 ```bash
 node test_login.js
+```
+
+8. Run All Tests:
+
+```bash
+python test_all.py
 ```
 
 ## Features
