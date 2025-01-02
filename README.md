@@ -1,3 +1,12 @@
+# Purpose
+Another demo test app, to test zast.ai's capabilities of discover vulnerabilities in fusion.js based web app.
+
+# Current Status
+Actively maintained.
+
+# Future Plan
+Maybe integrated into benchmark-nodejs, or just part of the daily benchmark test.
+
 # Invoicer
 
 An open-source app to generate / share invoices and download as PDF.
