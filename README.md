@@ -48,6 +48,10 @@ The application has path traversal vulnerabilities in:
 - `/api/file/read` - Allows reading files outside the intended directory
 - `/api/file/template` - Allows accessing templates outside the intended directory
 
+### 5. SQL Injection
+
+Please refer to the `pan/sqli` branch for SQL injection cases.
+
 ## Running the Application
 
 ### Using Pre-built Image (Recommended)
