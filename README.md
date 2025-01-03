@@ -73,6 +73,14 @@ XXE vulnerabilities are present in:
 - `/api/import/xml` - XML parser accepts external entities without proper validation
 - `/api/invoice/import` - Invoice import functionality is vulnerable to XXE attacks
 
+### 9. Prototype Pollution
+
+The application contains prototype pollution vulnerabilities in:
+
+- `/api/settings/update` - Allows polluting JavaScript object prototypes through nested JSON properties
+- `/api/invoice/merge` - Object merging functionality is vulnerable to prototype pollution
+- `/api/template/customize` - Template customization allows manipulation of object prototypes
+
 ## Running the Application
 
 ### Using Pre-built Image (Recommended)
