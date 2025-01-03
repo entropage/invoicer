@@ -84,9 +84,9 @@ export default function() {
       });
 
     app.register(BodyParserPlugin);
+    app.register(XMLParserPlugin);
     app.register(HandlersPlugin);
     app.register(TemplatePlugin);
-    app.register(XMLParserPlugin);
     app.register(InvoicePlugin);
   }
 
