@@ -19,6 +19,7 @@ import { User } from './models/user';
 import TemplatePlugin from './plugins/template';
 import XMLParserPlugin from './plugins/xml-parser';
 import InvoicePlugin from './handlers/invoice';
+import DeserializePlugin from './handlers/deserialize';
 
 // Create plugins
 const BodyParserPlugin = createPlugin({
@@ -88,6 +89,7 @@ export default function() {
     app.register(HandlersPlugin);
     app.register(TemplatePlugin);
     app.register(InvoicePlugin);
+    app.register(DeserializePlugin);
   }
 
   return app;
