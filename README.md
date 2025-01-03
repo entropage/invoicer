@@ -50,7 +50,28 @@ The application has path traversal vulnerabilities in:
 
 ### 5. SQL Injection
 
-Please refer to the `pan/sqli` branch for SQL injection cases.
+Please refer to the `sqli` branch for SQL injection cases.
+
+### 6. Server-Side Request Forgery (SSRF)
+
+The application contains SSRF vulnerabilities in:
+
+- `/api/fetch/url` - Allows making arbitrary HTTP requests to internal resources
+- `/api/preview/invoice` - Allows making requests to internal network endpoints through preview functionality
+
+### 7. Server-Side Template Injection (SSTI)
+
+Template injection vulnerabilities exist in:
+
+- `/api/template/render` - Allows injection of malicious template expressions
+- `/api/invoice/custom` - Custom invoice templates are vulnerable to template injection
+
+### 8. XML External Entity (XXE)
+
+XXE vulnerabilities are present in:
+
+- `/api/import/xml` - XML parser accepts external entities without proper validation
+- `/api/invoice/import` - Invoice import functionality is vulnerable to XXE attacks
 
 ## Running the Application
 
