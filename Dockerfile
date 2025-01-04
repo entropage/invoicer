@@ -1,4 +1,4 @@
-FROM invoicer:0.7-3f1a721
+FROM node:18.20.5
 WORKDIR /app
 COPY package.json yarn.lock ./
 COPY src/ ./src/
