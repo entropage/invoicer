@@ -1,6 +1,6 @@
 // @flow
 import { createPlugin } from 'fusion-core';
-import libxml from 'libxmljs2';
+import { XMLParser, XMLBuilder } from 'fast-xml-parser';
 import getRawBody from 'raw-body';
 
 export default createPlugin({
@@ -10,14 +10,21 @@ export default createPlugin({
         console.log('Parsing XML:', xmlString); // Debug log
         // Vulnerable configuration: Enable entity expansion and network access
         const options = {
-          noent: true, // Enable entity expansion
-          dtdload: true, // Enable DTD loading
-          dtdvalid: true, // Enable DTD validation
-          nocdata: true, // Don't merge CDATA
-          nonet: false // Allow network access
+          ignoreAttributes: false,
+          allowBooleanAttributes: true,
+          parseAttributeValue: true,
+          parseTagValue: true,
+          trimValues: true,
+          // Intentionally vulnerable configurations for educational purposes
+          allowDTD: true, // Enable DTD processing
+          validateXML: false, // Disable XML validation
+          processEntities: true, // Enable entity processing
+          stopNodes: [], // Process all nodes
+          htmlEntities: true, // Enable HTML entities
         };
-        
-        return libxml.parseXml(xmlString, options);
+
+        const parser = new XMLParser(options);
+        return parser.parse(xmlString);
       }
     };
   },
@@ -28,14 +35,21 @@ export default createPlugin({
         console.log('Parsing XML in middleware:', xmlString); // Debug log
         // Vulnerable configuration: Enable entity expansion and network access
         const options = {
-          noent: true, // Enable entity expansion
-          dtdload: true, // Enable DTD loading
-          dtdvalid: true, // Enable DTD validation
-          nocdata: true, // Don't merge CDATA
-          nonet: false // Allow network access
+          ignoreAttributes: false,
+          allowBooleanAttributes: true,
+          parseAttributeValue: true,
+          parseTagValue: true,
+          trimValues: true,
+          // Intentionally vulnerable configurations for educational purposes
+          allowDTD: true, // Enable DTD processing
+          validateXML: false, // Disable XML validation
+          processEntities: true, // Enable entity processing
+          stopNodes: [], // Process all nodes
+          htmlEntities: true, // Enable HTML entities
         };
-        
-        return libxml.parseXml(xmlString, options);
+
+        const parser = new XMLParser(options);
+        return parser.parse(xmlString);
       }
     };
 
@@ -75,4 +89,4 @@ export default createPlugin({
       });
     }
   }
-}); 
+});
