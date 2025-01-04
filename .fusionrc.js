@@ -4,5 +4,4 @@ module.exports = {
     Buffer: true,
     process: true,
   },
-  port: 3001,
 };
