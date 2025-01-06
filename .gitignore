@@ -23,5 +23,5 @@ build/
 .DS_Store
 Thumbs.db
 
-# Fusion.js build cache
-.fusion/.build-cache/
+# Fusion.js
+.fusion
