@@ -81,6 +81,22 @@ The application contains prototype pollution vulnerabilities in:
 - `/api/invoice/merge` - Object merging functionality is vulnerable to prototype pollution
 - `/api/template/customize` - Template customization allows manipulation of object prototypes
 
+### 10. Insecure Deserialization
+
+The application contains multiple insecure deserialization vulnerabilities in:
+
+- `/api/deserialize/node-serialize` - Vulnerable to RCE through node-serialize package
+- `/api/deserialize/yaml` - Allows arbitrary code execution through YAML deserialization
+- `/api/deserialize/eval` - Uses eval() for deserialization allowing code execution
+- `/api/deserialize/function` - Uses Function constructor allowing code execution
+
+The vulnerabilities allow attackers to:
+
+- Execute arbitrary JavaScript code
+- Access the file system
+- Make network requests
+- Execute system commands
+
 ## Running the Application
 
 ### Using Pre-built Image (Recommended)
