@@ -1,27 +1,36 @@
+import argparse
 import os
 import sys
 import unittest
-import argparse
-from test_path_traversal import PathTraversalTest
-from test_ssrf import SSRFTest
-from test_command_injection import (
-    test_simple_command_injection,
+
+# Add the test directory to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from test.test_command_injection import (
+    login,
     test_pdf_command_injection,
     test_ping_command_injection,
+    test_simple_command_injection,
     test_system_info_injection,
-    login
 )
-from test_idor import test_idor
-from test_invoicer_jwt import JWTVulnerabilityTest
+from test.test_idor import test_idor
+from test.test_invoicer_jwt import JWTVulnerabilityTest
+from test.test_path_traversal import PathTraversalTest
+from test.test_ssrf import SSRFTest
+from test.vulnerabilities.deserialization.test_deserialization import (
+    DeserializationTest,
+)
+
 
 def create_test_suite():
     """Create a test suite containing all vulnerability tests."""
     suite = unittest.TestSuite()
-    
+
     # Add unittest-based tests
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(PathTraversalTest))
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(SSRFTest))
-    
+    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(DeserializationTest))
+
     # Get token for command injection tests
     token = login()
     if token:
@@ -32,32 +41,32 @@ def create_test_suite():
         suite.addTest(unittest.FunctionTestCase(lambda: test_system_info_injection(token)))
     else:
         print("Warning: Command injection tests will be skipped due to login failure")
-    
+
     # Add other function-based tests
     suite.addTest(unittest.FunctionTestCase(test_idor))
-    
+
     # Add JWT tests
     jwt_tester = JWTVulnerabilityTest()
     suite.addTest(unittest.FunctionTestCase(jwt_tester.test_normal_flow))
     suite.addTest(unittest.FunctionTestCase(jwt_tester.test_token_forgery))
     suite.addTest(unittest.FunctionTestCase(jwt_tester.test_cross_environment))
     suite.addTest(unittest.FunctionTestCase(jwt_tester.test_token_expiration_bypass))
-    
+
     return suite
 
 def list_tests():
     """List all available tests."""
     print("\nAvailable unittest-based tests:\n")
-    
+
     # List unittest-based tests
-    for test_class in [PathTraversalTest, SSRFTest]:
+    for test_class in [PathTraversalTest, SSRFTest, DeserializationTest]:
         print(f"{test_class.__name__}:")
         for name in unittest.TestLoader().getTestCaseNames(test_class):
             test = getattr(test_class, name)
             doc = test.__doc__ or "No description available"
             print(f"  {name} - {doc}")
         print()
-    
+
     # List function-based tests
     print("Available function-based tests:\n")
     modules = {
@@ -69,14 +78,14 @@ def list_tests():
         ],
         'test_idor': [test_idor]
     }
-    
+
     for module_name, functions in modules.items():
         print(f"{module_name}:")
         for func in functions:
             doc = func.__doc__ or "No description available"
             print(f"  {func.__name__} - {doc}")
         print()
-    
+
     # List JWT tests
     print("test_invoicer_jwt:")
     jwt_tester = JWTVulnerabilityTest()
@@ -91,11 +100,11 @@ def main():
     parser.add_argument('--list', action='store_true', help='List all available tests')
     parser.add_argument('--test', help='Run a specific test (format: class_name.test_name or function_name)')
     args = parser.parse_args()
-    
+
     if args.list:
         list_tests()
         return
-    
+
     if args.test:
         # Run specific test
         if '.' in args.test:
@@ -132,9 +141,9 @@ def main():
     else:
         # Run all tests
         suite = create_test_suite()
-    
+
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suite)
 
 if __name__ == '__main__':
-    main() 
+    main()
