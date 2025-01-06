@@ -101,36 +101,8 @@ The vulnerabilities allow attackers to:
 
 ### Using Pre-built Image (Recommended)
 
-1. Install Docker and Docker Compose
-2. Create a `docker-compose.yml` file with:
-```yaml
-version: '3'
-services:
-  invoicer:
-    image: 339713064450.dkr.ecr.us-west-2.amazonaws.com/entropage/invoicer:0.3
-    ports:
-      - "3001:3001"
-      - "9229:9229"
-    environment:
-      - NODE_ENV=development
-      - PORT=3001
-      - DEBUG=*
-      - MONGODB_URI=mongodb://mongodb:27017/invoicer
-    depends_on:
-      - mongodb
-
-  mongodb:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-
-volumes:
-  mongodb_data:
-```
-3. Run `docker-compose up -d`
-4. The application will be available at http://localhost:3001
+1. Run `docker-compose up -d`
+2. The application will be available at http://localhost:3001
 
 ### Building from Source
 
