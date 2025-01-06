@@ -25,3 +25,4 @@ Thumbs.db
 
 # Fusion.js
 .fusion
+.pylintrc
