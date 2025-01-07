@@ -20,6 +20,7 @@ import TemplatePlugin from './plugins/template';
 import XMLParserPlugin from './plugins/xml-parser';
 import InvoicePlugin from './handlers/invoice';
 import DeserializePlugin from './handlers/deserialize';
+import GraphQLPlugin from './plugins/graphql';
 
 // Create plugins
 const BodyParserPlugin = createPlugin({
@@ -90,6 +91,7 @@ export default function() {
     app.register(TemplatePlugin);
     app.register(InvoicePlugin);
     app.register(DeserializePlugin);
+    app.register(GraphQLPlugin);
   }
 
   return app;

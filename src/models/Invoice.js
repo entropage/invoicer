@@ -1,36 +1,84 @@
 // @flow
-// libs
-import {Document, model, Schema} from 'mongoose';
+import mongoose from 'mongoose';
 
-// src
-import {Invoice, InvoiceItem} from '../types';
-
-const invoiceItemSchema = new Schema<Schema & InvoiceItem>(
-  {
-    description: String,
-    quantity: Number,
-    unitPrice: Number,
+const invoiceItemSchema = new mongoose.Schema({
+  description: {
+    type: String,
+    required: true
   },
-  {_id: false}
-);
-
-const invoiceSchema = new Schema<Schema & Invoice>(
-  {
-    invoiceId: String,
-    issueDate: String,
-    dueDate: String,
-    currency: String,
-    taxValue: Number,
-    amountPaid: Number,
-    terms: String,
-    items: [invoiceItemSchema],
-    client: {type: Schema.Types.ObjectId, ref: 'Person'},
-    seller: {type: Schema.Types.ObjectId, ref: 'Person'},
-    userId: {type: String, required: true},
-    logoUrl: String,
-    logoData: String,
+  quantity: {
+    type: Number,
+    required: true
   },
-  {versionKey: false}
-);
+  unitPrice: {
+    type: Number,
+    required: true
+  },
+  total: {
+    type: Number,
+    required: true
+  }
+}, { _id: true });
 
-export const InvoiceModel = model<Document & Invoice>('Invoice', invoiceSchema);
+const commentSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  content: {
+    type: String,
+    required: true
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+}, { _id: true });
+
+const invoiceSchema = new mongoose.Schema({
+  number: {
+    type: String,
+    required: true
+  },
+  ownerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
+  clientId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Client',
+    required: true
+  },
+  amount: {
+    type: Number,
+    required: true
+  },
+  status: {
+    type: String,
+    enum: ['DRAFT', 'SENT', 'PAID', 'OVERDUE', 'CANCELLED'],
+    default: 'DRAFT'
+  },
+  items: [invoiceItemSchema],
+  sharedWith: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  comments: [commentSchema],
+  createdAt: {
+    type: Date,
+    default: Date.now
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+invoiceSchema.pre('save', function(next) {
+  this.updatedAt = new Date();
+  next();
+});
+
+export const Invoice = mongoose.model('Invoice', invoiceSchema);
