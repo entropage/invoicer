@@ -40,14 +40,24 @@ if [ $# -eq 0 ]; then
 elif [ $# -eq 1 ]; then
     # Run all tests for a specific vulnerability
     vuln_type=$1
-    echo "Running all tests for vulnerability type: $vuln_type" | tee -a "../$log_file"
-    PYTHONPATH=.. python -m pytest "vulnerabilities/${vuln_type}/" -v --capture=no --log-cli-level=INFO 2>&1 | tee "../$test_output_file"
+    if [ "$vuln_type" = "graphql" ]; then
+        echo "Running GraphQL vulnerability tests..." | tee -a "../$log_file"
+        ./vulnerabilities/graphql/run_tests.sh 2>&1 | tee "../$test_output_file"
+    else
+        echo "Running all tests for vulnerability type: $vuln_type" | tee -a "../$log_file"
+        PYTHONPATH=.. python -m pytest "vulnerabilities/${vuln_type}/" -v --capture=no --log-cli-level=INFO 2>&1 | tee "../$test_output_file"
+    fi
 else
     # Run specific test case for a vulnerability
     vuln_type=$1
     shift
-    echo "Running specific test for vulnerability type: $vuln_type" | tee -a "../$log_file"
-    PYTHONPATH=.. python -m pytest "vulnerabilities/${vuln_type}/" "$@" -v --capture=no --log-cli-level=INFO 2>&1 | tee "../$test_output_file"
+    if [ "$vuln_type" = "graphql" ]; then
+        echo "Running specific GraphQL tests..." | tee -a "../$log_file"
+        PYTHONPATH=.. python -m pytest "vulnerabilities/graphql/" "$@" -v --capture=no --log-cli-level=INFO 2>&1 | tee "../$test_output_file"
+    else
+        echo "Running specific test for vulnerability type: $vuln_type" | tee -a "../$log_file"
+        PYTHONPATH=.. python -m pytest "vulnerabilities/${vuln_type}/" "$@" -v --capture=no --log-cli-level=INFO 2>&1 | tee "../$test_output_file"
+    fi
 fi
 
 test_status=$?
