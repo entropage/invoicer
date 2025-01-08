@@ -97,6 +97,38 @@ The vulnerabilities allow attackers to:
 - Make network requests
 - Execute system commands
 
+### 11. Cross-Site Scripting (XSS)
+
+The application contains multiple XSS vulnerabilities:
+
+#### DOM-based XSS
+
+- URL fragment processing in the main application allows execution of arbitrary
+  JavaScript through the URL hash  
+- Example: `#<script>alert('dom xss')</script>` or
+  `#<img src=x onerror="alert('dom xss')">`  
+
+#### Reflected XSS
+
+- `/api/search` endpoint reflects user input without sanitization
+- Search results are inserted into the DOM using `innerHTML`
+- Scripts in search results are automatically executed
+
+#### Stored XSS
+
+- `/api/comments` endpoint stores and displays unfiltered user input
+- Both comment content and author fields are vulnerable
+- Stored XSS payloads persist across sessions and affect all users
+- Comments are rendered using `dangerouslySetInnerHTML`
+
+The XSS vulnerabilities allow attackers to:
+
+- Execute arbitrary JavaScript in users' browsers
+- Steal session cookies and tokens
+- Perform actions on behalf of other users
+- Deface the application
+- Redirect users to malicious sites
+
 ## Running the Application
 
 ### Using Pre-built Image (Recommended)
