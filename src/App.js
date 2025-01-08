@@ -9,6 +9,7 @@ import { split } from 'fusion-react';
 import { PageNotFound } from './containers/PageNotFound';
 import { SnackbarProvider } from './components/Snackbar';
 import { getAuthToken } from './utils';
+import XssDemo from './components/XssDemo';
 
 // Lazy load components
 const Login = split({
@@ -67,6 +68,7 @@ export const App = (
     </Helmet>
     <SnackbarProvider>
       <Switch>
+        <Route exact path="/xss-demo" component={XssDemo} />
         <Route exact path="/login" component={Login} />
         <ProtectedRoute exact path="/" component={CreateInvoice} />
         <ProtectedRoute exact path="/:id" component={ViewInvoice} />

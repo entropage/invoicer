@@ -6,6 +6,7 @@ import {readFile, readFileSecure, getPdfTemplate} from './file';
 import {executeCommand, generatePdfReport, checkConnection, getSystemInfo} from './system';
 import templateHandler from './template';
 import settingsHandler from './settings';
+import xssHandler from './xss';
 
 const router = new Router();
 
@@ -13,6 +14,9 @@ const router = new Router();
 router.get('/health', async (ctx) => {
   ctx.body = {status: 'ok'};
 });
+
+// XSS routes
+router.use(xssHandler);
 
 // Template routes
 router.all('/api/template(.*)', templateHandler);
