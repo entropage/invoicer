@@ -1,19 +1,19 @@
 # Purpose
-Another demo test app, to test zast.ai's capabilities of discover vulnerabilities in fusion.js based web app.
+Another demo test app, to test zast.ai's capabilities of discover vulnerabilities in fusion.js based web app.  
 
 # Current Status
-Actively maintained.
+Actively maintained.  
 
 # Future Plan
-Maybe integrated into benchmark-nodejs, or just part of the daily benchmark test.
+Maybe integrated into benchmark-nodejs, or just part of the daily benchmark test.  
 
 # Invoicer
 
-An open-source app to generate / share invoices and download as PDF.
+An open-source app to generate / share invoices and download as PDF.  
 
 ## Security Vulnerabilities (For Educational Purposes)
 
-This application intentionally includes security vulnerabilities for educational purposes. DO NOT use this version in production.
+This application intentionally includes security vulnerabilities for educational purposes. DO NOT use this version in production.  
 
 ### 1. Insecure Direct Object References (IDOR)
 
@@ -23,7 +23,7 @@ The application has IDOR vulnerabilities in the invoice endpoints that allow una
 - PUT `/api/invoice/:id` - Users can modify any invoice by ID without ownership verification
 - DELETE `/api/invoice/:id` - Users can delete any invoice by ID without ownership verification
 
-Only the `/api/invoice/all` endpoint properly checks user ownership.
+Only the `/api/invoice/all` endpoint properly checks user ownership.  
 
 ### 2. JWT Authentication Issues
 
@@ -50,7 +50,7 @@ The application has path traversal vulnerabilities in:
 
 ### 5. SQL Injection
 
-Please refer to the `sqli` branch for SQL injection cases.
+Please refer to the `sqli` branch for SQL injection cases.  
 
 ### 6. Server-Side Request Forgery (SSRF)
 
@@ -78,7 +78,6 @@ XXE vulnerabilities are present in:
 The application contains prototype pollution vulnerabilities in:
 
 - `/api/settings/update` - Allows polluting JavaScript object prototypes through nested JSON properties
-- `/api/invoice/merge` - Object merging functionality is vulnerable to prototype pollution
 - `/api/template/customize` - Template customization allows manipulation of object prototypes
 
 ### 10. Insecure Deserialization
