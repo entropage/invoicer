@@ -21,6 +21,12 @@ import XMLParserPlugin from './plugins/xml-parser';
 import InvoicePlugin from './handlers/invoice';
 import DeserializePlugin from './handlers/deserialize';
 import GraphQLPlugin from './handlers/graphql';
+import {
+  ApolloClientToken,
+  ApolloContextToken,
+  ApolloClientPlugin,
+  ApolloRootProviderPlugin
+} from './plugins/apollo';
 
 // Create plugins
 const BodyParserPlugin = createPlugin({
@@ -67,6 +73,11 @@ export default function() {
   app.register(HelmetPlugin);
   app.register(UniversalEventsToken, UniversalEvents);
   __BROWSER__ && app.register(FetchToken, window.fetch);
+
+  // Register Apollo plugins
+  app.register(ApolloContextToken, {});
+  app.register(ApolloClientToken, ApolloClientPlugin);
+  app.register(ApolloRootProviderPlugin);
 
   if (__NODE__) {
     // Set port to 3000 to match test expectations

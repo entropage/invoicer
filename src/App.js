@@ -19,6 +19,13 @@ const Login = split({
   ErrorComponent: () => <div>Error loading login page!</div>,
 });
 
+const GraphQLExplorer = split({
+  defer: true,
+  load: () => import('./containers/GraphQLExplorer/GraphQLExplorer').then((module) => ({ default: module.GraphQLExplorer })),
+  LoadingComponent: () => <div>Loading...</div>,
+  ErrorComponent: () => <div>Error loading GraphQL explorer!</div>,
+});
+
 const CreateInvoice = split({
   defer: true,
   load: () => import('./containers/CreateInvoice').then((module) => ({ default: module.CreateInvoice })),
@@ -71,6 +78,7 @@ export const App = (
         <Route exact path="/xss-demo" component={XssDemo} />
         <Route exact path="/login" component={Login} />
         <ProtectedRoute exact path="/" component={CreateInvoice} />
+        <ProtectedRoute exact path="/graphql-explorer" component={GraphQLExplorer} />
         <ProtectedRoute exact path="/:id" component={ViewInvoice} />
         <Route component={PageNotFound} />
       </Switch>

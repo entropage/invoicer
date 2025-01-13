@@ -200,6 +200,53 @@ node test_login.js
 2. Download in PDF
 3. Share invoice with clients using shareable link
 4. Print invoice
+- **GraphQL Explorer**: Interactive UI to test and explore GraphQL vulnerabilities
+- **REST API**: Authentication endpoints with intentional vulnerabilities
+- **MongoDB Backend**: NoSQL database with flexible schema
+- **JWT Authentication**: Token-based authentication system
+- **Docker Support**: Easy deployment with Docker containers
+
+## Getting Started
+
+1. Clone the repository
+2. Install dependencies: `yarn install`
+3. Start MongoDB: `docker-compose up -d mongodb`
+4. Start the application: `yarn start`
+5. Visit http://localhost:3000
+6. Login with default credentials:
+   - Username: test
+   - Password: test123
+
+## Exploring Vulnerabilities
+
+The application includes several intentional vulnerabilities for educational purposes:
+
+### GraphQL Vulnerabilities
+
+Navigate to `/graphql-explorer` to access the interactive UI for testing GraphQL vulnerabilities:
+
+1. Basic User Data IDOR
+2. Private Data with Circular References
+3. Admin Access IDOR
+4. Invoice Access IDOR
+5. Mass Assignment
+6. Profile Update IDOR
+7. Invoice Deletion IDOR
+8. Predictable IDs
+9. Error Information Disclosure
+
+See [GraphQL IDOR Documentation](docs/vulnerabilities/graphql_idor.md) for detailed information.  
+
+### REST API Vulnerabilities
+
+The authentication endpoints demonstrate common REST API vulnerabilities:
+
+1. SQL Injection
+2. JWT Token Tampering
+3. Path Traversal
+4. Command Injection
+
+See [REST API Documentation](docs/vulnerabilities/rest_api.md) for details.  
 
 ## Limitations
 

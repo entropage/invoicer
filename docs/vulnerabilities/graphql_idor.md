@@ -1,10 +1,15 @@
 # GraphQL IDOR Vulnerabilities
 
-This document describes the intentionally vulnerable GraphQL endpoints implemented for educational purposes in the Invoicer application.  
+This document describes the intentionally vulnerable GraphQL endpoints  
+implemented for educational purposes in the Invoicer application.  
 
 ## Overview
 
-Insecure Direct Object References (IDOR) in GraphQL APIs occur when an application fails to properly validate access permissions before performing operations on objects. Our implementation includes various IDOR vulnerabilities commonly found in GraphQL applications.  
+Insecure Direct Object References (IDOR) in GraphQL APIs occur when an  
+application fails to properly validate access permissions before performing  
+operations on objects. Our implementation includes various IDOR  
+vulnerabilities  
+commonly found in GraphQL applications.  
 
 ## Vulnerabilities and Test Cases
 
@@ -22,11 +27,13 @@ query GetUser($id: ID!) {
 }
 ```
 
-**Impact**: Any authenticated user can access another user's data, including sensitive role information.  
+**Impact**: Any authenticated user can access another user's data, including  
+sensitive role information.  
 
 ### 2. Private Data IDOR with Circular References
 
-**Vulnerability**: Exposes private user information through nested circular references.  
+**Vulnerability**: Exposes private user information through nested circular  
+references.  
 
 ```graphql
 query GetUser($id: ID!) {
@@ -48,6 +55,7 @@ query GetUser($id: ID!) {
 ```
 
 **Impact**:
+
 - Exposes sensitive financial data
 - Allows deep nesting that could impact server performance
 - Creates circular references that could be exploited
@@ -146,7 +154,8 @@ mutation {
 
 ### 9. Error Information Disclosure
 
-**Vulnerability**: Returns detailed error messages including stack traces and database internals.  
+**Vulnerability**: Returns detailed error messages including stack traces and  
+database internals.  
 
 ```graphql
 query {
@@ -157,17 +166,17 @@ query {
 ```
 
 **Example Response**:
+
 ```json
 {
-  "errors": [{
-    "message": "CastError: Cast to ObjectId failed...",
-    "extensions": {
-      "stacktrace": [
-        "at model.Document.get...",
-        "at MongoDB.findById..."
-      ]
+  "errors": [
+    {
+      "message": "CastError: Cast to ObjectId failed...",
+      "extensions": {
+        "stacktrace": ["at model.Document.get...", "at MongoDB.findById..."]
+      }
     }
-  }]
+  ]
 }
 ```
 
@@ -175,7 +184,8 @@ query {
 
 ### 10. Query Depth Attack
 
-**Vulnerability**: Allows deeply nested queries (up to 10 levels) that could cause performance issues.  
+**Vulnerability**: Allows deeply nested queries (up to 10 levels) that could  
+cause performance issues.  
 
 ```graphql
 query GetUser($id: ID!) {
@@ -194,13 +204,15 @@ query GetUser($id: ID!) {
 ```
 
 **Impact**:
+
 - Potential DoS through resource exhaustion
 - Memory consumption through deep nesting
 - CPU consumption through circular references
 
 ## Security Notes
 
-These vulnerabilities are intentionally implemented for educational purposes. In a production environment, you should:
+These vulnerabilities are intentionally implemented for educational purposes  
+in a production environment, you should:
 
 1. Implement proper authorization checks
 2. Validate object ownership
@@ -220,4 +232,102 @@ Run the test suite to verify all vulnerabilities are working as expected:
 pytest test_graphql_idor.py -v
 ```
 
-All tests should pass, demonstrating each vulnerability is properly implemented for educational purposes.  
+All tests should pass, demonstrating each vulnerability is properly  
+implemented  
+for educational purposes.  
+
+## Exploring Vulnerabilities
+
+The application includes a dedicated GraphQL Explorer page that provides an  
+interactive interface to test all vulnerabilities:
+
+### Using the GraphQL Explorer UI
+
+1. Login with default credentials (username: test, password: test123)
+2. Navigate to `/graphql-explorer`
+3. Use the interactive UI to test each vulnerability:
+
+Each vulnerability has its own section with:
+
+- Dedicated inputs and controls
+- Real-time results display
+- Error messages and stack traces when applicable
+- Clear examples of how to exploit the vulnerability
+
+### Available Vulnerability Tests
+
+1. **Basic User Data IDOR**
+
+   - Input any user ID to access their data
+   - View username, role, and creation date
+   - No authorization checks are performed
+
+2. **Private Data with Circular References**
+
+   - Configure nesting depth (up to 10 levels)
+   - View sensitive financial data
+   - Observe circular reference exploitation
+
+3. **Admin Access**
+
+   - View all users in the system
+   - Access admin-only functionality
+   - No role-based access control
+
+4. **Invoice Access**
+
+   - Access any invoice by ID
+   - View detailed invoice information
+   - No ownership validation
+
+5. **Mass Assignment**
+
+   - Execute arbitrary MongoDB queries
+   - Test different filter patterns
+   - Explore NoSQL injection possibilities
+
+6. **Profile Update**
+
+   - Modify any user's profile
+   - No ownership validation
+   - Test unauthorized modifications
+
+7. **Invoice Deletion**
+
+   - Delete any invoice by ID
+   - No ownership checks
+   - Test unauthorized deletions
+
+8. **Predictable IDs**
+
+   - Create private data with predictable IDs
+   - Observe ID patterns
+   - Test enumeration possibilities
+
+9. **Error Information Disclosure**
+   - View detailed error messages
+   - Observe stack traces
+   - Access internal implementation details
+
+### Tips for Testing
+
+1. Use browser dev tools to:
+
+   - Monitor GraphQL requests in Network tab
+   - Observe query variables and responses
+   - Study error messages and stack traces
+
+2. Try different input patterns:
+
+   - Invalid IDs to trigger errors
+   - Deep nesting to test performance
+   - Various MongoDB query operators
+
+3. Observe security implications:
+   - Data exposure through IDOR
+   - Authorization bypass methods
+   - Information disclosure vectors
+
+Remember: These vulnerabilities are intentionally implemented for educational  
+purposes. In a production environment, proper authorization checks and data  
+access controls should be implemented.  
