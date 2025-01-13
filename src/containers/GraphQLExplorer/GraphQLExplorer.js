@@ -37,7 +37,7 @@ const GET_USER = gql`
 
 // Private Data with Circular References
 const GET_PRIVATE_DATA = gql`
-  query GetPrivateData($id: ID!, $depth: Int!) {
+  query GetPrivateData($id: ID!) {
     user(id: $id) {
       privateData {
         bankAccount
@@ -189,7 +189,7 @@ export function GraphQLExplorer() {
 
     // Private Data Query
     const { data: privateDataResult, loading: privateLoading } = useQuery(GET_PRIVATE_DATA, {
-        variables: { id: userId, depth },
+        variables: { id: userId },
         skip: !userId,
         onError: handleError
     });

@@ -32,7 +32,7 @@ const ApolloClientPlugin = createPlugin({
         });
 
         // Error handling link
-        const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
+        const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
             if (graphQLErrors) {
                 graphQLErrors.forEach(({ message, locations, path }) => {
                     console.error(
@@ -43,8 +43,6 @@ const ApolloClientPlugin = createPlugin({
             if (networkError) {
                 console.error(`[Network error]: ${networkError}`);
             }
-            // Don't throw the error, let the component handle it
-            return forward(operation);
         });
 
         const requestLink = from([
