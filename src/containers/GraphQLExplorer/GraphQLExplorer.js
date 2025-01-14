@@ -1,7 +1,7 @@
 // @flow
 import * as React from 'react';
 import { useState } from 'react';
-import { gql, useQuery, useMutation } from '@apollo/client';
+import { gql, useQuery, useMutation, useLazyQuery } from '@apollo/client';
 import {
     Box,
     Container,
@@ -158,6 +158,11 @@ export function GraphQLExplorer() {
     const [privateData, setPrivateData] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
     const [success, setSuccess] = useState('');
+    const [tempUserId, setTempUserId] = useState('');
+    const [tempInvoiceId, setTempInvoiceId] = useState('');
+    const [tempFilter, setTempFilter] = useState('{}');
+    const [tempNewUsername, setTempNewUsername] = useState('');
+    const [tempPrivateData, setTempPrivateData] = useState('');
 
     // Track expanded state for each accordion
     const [expandedSections, setExpandedSections] = useState({
@@ -201,36 +206,25 @@ export function GraphQLExplorer() {
         onError: handleError
     });
 
-    // Basic User Query
-    const { data: userData, loading: userLoading, error: userError } = useQuery(GET_USER, {
-        variables: { id: userId },
-        skip: !userId,
+    // Convert all queries to lazy queries
+    const [executeUserQuery, { data: userData, loading: userLoading, error: userError }] = useLazyQuery(GET_USER, {
         onError: handleError
     });
 
-    // Private Data Query
-    const { data: privateDataResult, loading: privateLoading } = useQuery(GET_PRIVATE_DATA, {
-        variables: { id: userId },
-        skip: !userId,
+    const [executePrivateDataQuery, { data: privateDataResult, loading: privateLoading }] = useLazyQuery(GET_PRIVATE_DATA, {
+        onError: handleError
+    });
+
+    const [executeInvoiceQuery, { data: invoiceData, loading: invoiceLoading }] = useLazyQuery(GET_INVOICE, {
+        onError: handleError
+    });
+
+    const [executeSearchQuery, { data: searchData, loading: searchLoading }] = useLazyQuery(SEARCH_INVOICES, {
         onError: handleError
     });
 
     // Admin Access Query
     const { data: allUsersData, loading: allUsersLoading } = useQuery(GET_ALL_USERS, {
-        onError: handleError
-    });
-
-    // Invoice Query
-    const { data: invoiceData, loading: invoiceLoading } = useQuery(GET_INVOICE, {
-        variables: { id: invoiceId },
-        skip: !invoiceId,
-        onError: handleError
-    });
-
-    // Mass Assignment Query
-    const { data: searchData, loading: searchLoading } = useQuery(SEARCH_INVOICES, {
-        variables: { filter },
-        skip: !filter,
         onError: handleError
     });
 
@@ -272,20 +266,105 @@ export function GraphQLExplorer() {
         }
     }, [userId, login, handleError]);
 
-    // Handlers
-    const handleUpdateProfile = () => {
-        if (!userId || !newUsername) return;
-        updateProfile({ variables: { userId, newUsername } });
+    // Form submission handlers
+    const handleBasicUserQuery = (e) => {
+        e?.preventDefault();
+        if (!tempUserId) return;
+
+        // Validate MongoDB ObjectId format (24 hex characters)
+        const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+        if (!objectIdPattern.test(tempUserId)) {
+            handleError(new Error('Invalid ObjectId format. Must be 24 hex characters.'));
+            return;
+        }
+
+        setUserId(tempUserId);
+        executeUserQuery({ variables: { id: tempUserId } });
     };
 
-    const handleDeleteInvoice = () => {
-        if (!invoiceId) return;
-        deleteInvoice({ variables: { invoiceId } });
+    const handlePrivateDataQuery = (e) => {
+        e?.preventDefault();
+        if (!tempUserId) return;
+
+        const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+        if (!objectIdPattern.test(tempUserId)) {
+            handleError(new Error('Invalid ObjectId format. Must be 24 hex characters.'));
+            return;
+        }
+
+        setUserId(tempUserId);
+        executePrivateDataQuery({ variables: { id: tempUserId } });
     };
 
-    const handleCreatePrivateData = () => {
-        if (!userId || !privateData) return;
-        createPrivateData({ variables: { userId, data: privateData } });
+    const handleInvoiceQuery = (e) => {
+        e?.preventDefault();
+        if (!tempInvoiceId) return;
+
+        const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+        if (!objectIdPattern.test(tempInvoiceId)) {
+            handleError(new Error('Invalid ObjectId format. Must be 24 hex characters.'));
+            return;
+        }
+
+        setInvoiceId(tempInvoiceId);
+        executeInvoiceQuery({ variables: { id: tempInvoiceId } });
+    };
+
+    const handleSearchQuery = (e) => {
+        e?.preventDefault();
+        if (!tempFilter) return;
+
+        try {
+            JSON.parse(tempFilter); // Validate JSON format
+            setFilter(tempFilter);
+            executeSearchQuery({ variables: { filter: tempFilter } });
+        } catch (error) {
+            handleError(new Error('Invalid JSON format'));
+        }
+    };
+
+    const handleUpdateProfile = (e) => {
+        e?.preventDefault();
+        if (!tempUserId || !tempNewUsername) return;
+
+        const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+        if (!objectIdPattern.test(tempUserId)) {
+            handleError(new Error('Invalid ObjectId format. Must be 24 hex characters.'));
+            return;
+        }
+
+        setUserId(tempUserId);
+        setNewUsername(tempNewUsername);
+        updateProfile({ variables: { userId: tempUserId, newUsername: tempNewUsername } });
+    };
+
+    const handleDeleteInvoice = (e) => {
+        e?.preventDefault();
+        if (!tempInvoiceId) return;
+
+        const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+        if (!objectIdPattern.test(tempInvoiceId)) {
+            handleError(new Error('Invalid ObjectId format. Must be 24 hex characters.'));
+            return;
+        }
+
+        setInvoiceId(tempInvoiceId);
+        deleteInvoice({ variables: { invoiceId: tempInvoiceId } });
+    };
+
+    const handleCreatePrivateData = (e) => {
+        e?.preventDefault();
+        if (!tempUserId || !tempPrivateData) return;
+
+        const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+        if (!objectIdPattern.test(tempUserId)) {
+            handleError(new Error('Invalid ObjectId format. Must be 24 hex characters.'));
+            return;
+        }
+
+        setUserId(tempUserId);
+        setPrivateData(tempPrivateData);
+        createPrivateData({ variables: { userId: tempUserId, data: tempPrivateData } });
     };
 
     // Loading state
@@ -326,20 +405,24 @@ export function GraphQLExplorer() {
                         <Typography variant="h6">1. Basic User Data IDOR</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <Box width="100%">
+                        <Box width="100%" component="form" onSubmit={handleBasicUserQuery}>
                             <TextField
                                 fullWidth
                                 label="User ID"
-                                value={userId}
-                                onChange={(e) => setUserId(e.target.value)}
+                                value={tempUserId}
+                                onChange={(e) => setTempUserId(e.target.value)}
                                 margin="normal"
                                 helperText="Must be a valid MongoDB ObjectId (24 hex characters)"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                    }
-                                }}
+                                error={tempUserId && !/^[0-9a-fA-F]{24}$/.test(tempUserId)}
                             />
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                type="submit"
+                                disabled={!tempUserId || userLoading || !/^[0-9a-fA-F]{24}$/.test(tempUserId)}
+                            >
+                                Query User
+                            </Button>
                             {userLoading ? (
                                 <CircularProgress />
                             ) : userData?.user && (
@@ -375,18 +458,15 @@ export function GraphQLExplorer() {
                         <Typography variant="h6">2. Private Data IDOR</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <Box width="100%">
+                        <Box width="100%" component="form" onSubmit={handlePrivateDataQuery}>
                             <TextField
                                 fullWidth
                                 label="User ID"
-                                value={userId}
-                                onChange={(e) => setUserId(e.target.value)}
+                                value={tempUserId}
+                                onChange={(e) => setTempUserId(e.target.value)}
                                 margin="normal"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                    }
-                                }}
+                                helperText="Must be a valid MongoDB ObjectId (24 hex characters)"
+                                error={tempUserId && !/^[0-9a-fA-F]{24}$/.test(tempUserId)}
                             />
                             <TextField
                                 fullWidth
@@ -395,12 +475,15 @@ export function GraphQLExplorer() {
                                 value={depth}
                                 onChange={(e) => setDepth(parseInt(e.target.value, 10))}
                                 margin="normal"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                    }
-                                }}
                             />
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                type="submit"
+                                disabled={!tempUserId || privateLoading || !/^[0-9a-fA-F]{24}$/.test(tempUserId)}
+                            >
+                                Query Private Data
+                            </Button>
                             {privateLoading ? (
                                 <CircularProgress />
                             ) : privateDataResult?.user && (
@@ -459,19 +542,24 @@ export function GraphQLExplorer() {
                         <Typography variant="h6">4. Invoice Access IDOR</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <Box width="100%">
+                        <Box width="100%" component="form" onSubmit={handleInvoiceQuery}>
                             <TextField
                                 fullWidth
                                 label="Invoice ID"
-                                value={invoiceId}
-                                onChange={(e) => setInvoiceId(e.target.value)}
+                                value={tempInvoiceId}
+                                onChange={(e) => setTempInvoiceId(e.target.value)}
                                 margin="normal"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                    }
-                                }}
+                                helperText="Must be a valid MongoDB ObjectId (24 hex characters)"
+                                error={tempInvoiceId && !/^[0-9a-fA-F]{24}$/.test(tempInvoiceId)}
                             />
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                type="submit"
+                                disabled={!tempInvoiceId || invoiceLoading || !/^[0-9a-fA-F]{24}$/.test(tempInvoiceId)}
+                            >
+                                Query Invoice
+                            </Button>
                             {invoiceLoading ? (
                                 <CircularProgress />
                             ) : invoiceData?.invoice && (
@@ -492,21 +580,25 @@ export function GraphQLExplorer() {
                         <Typography variant="h6">5. Mass Assignment IDOR</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <Box width="100%">
+                        <Box width="100%" component="form" onSubmit={handleSearchQuery}>
                             <TextField
                                 fullWidth
                                 label="Filter (JSON)"
-                                value={filter}
-                                onChange={(e) => setFilter(e.target.value)}
+                                value={tempFilter}
+                                onChange={(e) => setTempFilter(e.target.value)}
                                 margin="normal"
                                 multiline
                                 rows={3}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter' && !e.shiftKey) {
-                                        e.preventDefault();
-                                    }
-                                }}
+                                helperText="Must be valid JSON format"
                             />
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                type="submit"
+                                disabled={!tempFilter || searchLoading}
+                            >
+                                Search Invoices
+                            </Button>
                             {searchLoading ? (
                                 <CircularProgress />
                             ) : searchData?.searchInvoices && (
@@ -527,36 +619,28 @@ export function GraphQLExplorer() {
                         <Typography variant="h6">6. Profile Update IDOR</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <Box width="100%">
+                        <Box width="100%" component="form" onSubmit={handleUpdateProfile}>
                             <TextField
                                 fullWidth
                                 label="User ID"
-                                value={userId}
-                                onChange={(e) => setUserId(e.target.value)}
+                                value={tempUserId}
+                                onChange={(e) => setTempUserId(e.target.value)}
                                 margin="normal"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                    }
-                                }}
+                                helperText="Must be a valid MongoDB ObjectId (24 hex characters)"
+                                error={tempUserId && !/^[0-9a-fA-F]{24}$/.test(tempUserId)}
                             />
                             <TextField
                                 fullWidth
                                 label="New Username"
-                                value={newUsername}
-                                onChange={(e) => setNewUsername(e.target.value)}
+                                value={tempNewUsername}
+                                onChange={(e) => setTempNewUsername(e.target.value)}
                                 margin="normal"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                    }
-                                }}
                             />
                             <Button
                                 variant="contained"
                                 color="primary"
-                                onClick={handleUpdateProfile}
-                                disabled={updateLoading}
+                                type="submit"
+                                disabled={!tempUserId || !tempNewUsername || updateLoading || !/^[0-9a-fA-F]{24}$/.test(tempUserId)}
                             >
                                 Update Profile
                             </Button>
@@ -573,24 +657,24 @@ export function GraphQLExplorer() {
                         <Typography variant="h6">7. Invoice Deletion IDOR</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <Box width="100%">
+                        <Box width="100%" component="form" onSubmit={(e) => {
+                            e.preventDefault();
+                            handleDeleteInvoice();
+                        }}>
                             <TextField
                                 fullWidth
                                 label="Invoice ID"
-                                value={invoiceId}
-                                onChange={(e) => setInvoiceId(e.target.value)}
+                                value={tempInvoiceId}
+                                onChange={(e) => setTempInvoiceId(e.target.value)}
                                 margin="normal"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                    }
-                                }}
+                                helperText="Must be a valid MongoDB ObjectId (24 hex characters)"
+                                error={tempInvoiceId && !/^[0-9a-fA-F]{24}$/.test(tempInvoiceId)}
                             />
                             <Button
                                 variant="contained"
                                 color="secondary"
-                                onClick={handleDeleteInvoice}
-                                disabled={deleteLoading}
+                                type="submit"
+                                disabled={!tempInvoiceId || deleteLoading || !/^[0-9a-fA-F]{24}$/.test(tempInvoiceId)}
                             >
                                 Delete Invoice
                             </Button>
@@ -607,36 +691,32 @@ export function GraphQLExplorer() {
                         <Typography variant="h6">8. Predictable IDs IDOR</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                        <Box width="100%">
+                        <Box width="100%" component="form" onSubmit={(e) => {
+                            e.preventDefault();
+                            handleCreatePrivateData();
+                        }}>
                             <TextField
                                 fullWidth
                                 label="User ID"
-                                value={userId}
-                                onChange={(e) => setUserId(e.target.value)}
+                                value={tempUserId}
+                                onChange={(e) => setTempUserId(e.target.value)}
                                 margin="normal"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                    }
-                                }}
+                                helperText="Must be a valid MongoDB ObjectId (24 hex characters)"
+                                error={tempUserId && !/^[0-9a-fA-F]{24}$/.test(tempUserId)}
                             />
                             <TextField
                                 fullWidth
                                 label="Private Data"
-                                value={privateData}
-                                onChange={(e) => setPrivateData(e.target.value)}
+                                value={tempPrivateData}
+                                onChange={(e) => setTempPrivateData(e.target.value)}
                                 margin="normal"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                    }
-                                }}
+                                helperText="Must be valid JSON format"
                             />
                             <Button
                                 variant="contained"
                                 color="primary"
-                                onClick={handleCreatePrivateData}
-                                disabled={createLoading}
+                                type="submit"
+                                disabled={!tempUserId || !tempPrivateData || createLoading || !/^[0-9a-fA-F]{24}$/.test(tempUserId)}
                             >
                                 Create Private Data
                             </Button>
