@@ -159,6 +159,27 @@ export function GraphQLExplorer() {
     const [errorMessage, setErrorMessage] = useState('');
     const [success, setSuccess] = useState('');
 
+    // Track expanded state for each accordion
+    const [expandedSections, setExpandedSections] = useState({
+        basicUser: false,
+        privateData: false,
+        adminAccess: false,
+        invoiceAccess: false,
+        massAssignment: false,
+        profileUpdate: false,
+        invoiceDeletion: false,
+        predictableIds: false,
+        errorDisclosure: false
+    });
+
+    // Handle accordion expansion
+    const handleAccordionChange = (section) => (_, isExpanded) => {
+        setExpandedSections(prev => ({
+            ...prev,
+            [section]: isExpanded
+        }));
+    };
+
     // Error handling helper
     const handleError = React.useCallback((error) => {
         console.error('[GraphQLExplorer] Error:', error);
@@ -297,7 +318,10 @@ export function GraphQLExplorer() {
                 </Typography>
 
                 {/* 1. Basic User Data IDOR */}
-                <Accordion>
+                <Accordion
+                    expanded={expandedSections.basicUser}
+                    onChange={handleAccordionChange('basicUser')}
+                >
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography variant="h6">1. Basic User Data IDOR</Typography>
                     </AccordionSummary>
@@ -310,6 +334,11 @@ export function GraphQLExplorer() {
                                 onChange={(e) => setUserId(e.target.value)}
                                 margin="normal"
                                 helperText="Must be a valid MongoDB ObjectId (24 hex characters)"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                    }
+                                }}
                             />
                             {userLoading ? (
                                 <CircularProgress />
@@ -338,7 +367,10 @@ export function GraphQLExplorer() {
                 </Accordion>
 
                 {/* 2. Private Data IDOR */}
-                <Accordion>
+                <Accordion
+                    expanded={expandedSections.privateData}
+                    onChange={handleAccordionChange('privateData')}
+                >
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography variant="h6">2. Private Data IDOR</Typography>
                     </AccordionSummary>
@@ -350,6 +382,11 @@ export function GraphQLExplorer() {
                                 value={userId}
                                 onChange={(e) => setUserId(e.target.value)}
                                 margin="normal"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                    }
+                                }}
                             />
                             <TextField
                                 fullWidth
@@ -358,6 +395,11 @@ export function GraphQLExplorer() {
                                 value={depth}
                                 onChange={(e) => setDepth(parseInt(e.target.value, 10))}
                                 margin="normal"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                    }
+                                }}
                             />
                             {privateLoading ? (
                                 <CircularProgress />
@@ -371,7 +413,10 @@ export function GraphQLExplorer() {
                 </Accordion>
 
                 {/* 3. Admin Access IDOR */}
-                <Accordion>
+                <Accordion
+                    expanded={expandedSections.adminAccess}
+                    onChange={handleAccordionChange('adminAccess')}
+                >
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography variant="h6">3. Admin Access IDOR</Typography>
                     </AccordionSummary>
@@ -406,7 +451,10 @@ export function GraphQLExplorer() {
                 </Accordion>
 
                 {/* 4. Invoice Access IDOR */}
-                <Accordion>
+                <Accordion
+                    expanded={expandedSections.invoiceAccess}
+                    onChange={handleAccordionChange('invoiceAccess')}
+                >
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography variant="h6">4. Invoice Access IDOR</Typography>
                     </AccordionSummary>
@@ -418,6 +466,11 @@ export function GraphQLExplorer() {
                                 value={invoiceId}
                                 onChange={(e) => setInvoiceId(e.target.value)}
                                 margin="normal"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                    }
+                                }}
                             />
                             {invoiceLoading ? (
                                 <CircularProgress />
@@ -431,7 +484,10 @@ export function GraphQLExplorer() {
                 </Accordion>
 
                 {/* 5. Mass Assignment IDOR */}
-                <Accordion>
+                <Accordion
+                    expanded={expandedSections.massAssignment}
+                    onChange={handleAccordionChange('massAssignment')}
+                >
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography variant="h6">5. Mass Assignment IDOR</Typography>
                     </AccordionSummary>
@@ -445,6 +501,11 @@ export function GraphQLExplorer() {
                                 margin="normal"
                                 multiline
                                 rows={3}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                    }
+                                }}
                             />
                             {searchLoading ? (
                                 <CircularProgress />
@@ -458,7 +519,10 @@ export function GraphQLExplorer() {
                 </Accordion>
 
                 {/* 6. Profile Update IDOR */}
-                <Accordion>
+                <Accordion
+                    expanded={expandedSections.profileUpdate}
+                    onChange={handleAccordionChange('profileUpdate')}
+                >
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography variant="h6">6. Profile Update IDOR</Typography>
                     </AccordionSummary>
@@ -470,6 +534,11 @@ export function GraphQLExplorer() {
                                 value={userId}
                                 onChange={(e) => setUserId(e.target.value)}
                                 margin="normal"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                    }
+                                }}
                             />
                             <TextField
                                 fullWidth
@@ -477,6 +546,11 @@ export function GraphQLExplorer() {
                                 value={newUsername}
                                 onChange={(e) => setNewUsername(e.target.value)}
                                 margin="normal"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                    }
+                                }}
                             />
                             <Button
                                 variant="contained"
@@ -491,7 +565,10 @@ export function GraphQLExplorer() {
                 </Accordion>
 
                 {/* 7. Invoice Deletion IDOR */}
-                <Accordion>
+                <Accordion
+                    expanded={expandedSections.invoiceDeletion}
+                    onChange={handleAccordionChange('invoiceDeletion')}
+                >
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography variant="h6">7. Invoice Deletion IDOR</Typography>
                     </AccordionSummary>
@@ -503,6 +580,11 @@ export function GraphQLExplorer() {
                                 value={invoiceId}
                                 onChange={(e) => setInvoiceId(e.target.value)}
                                 margin="normal"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                    }
+                                }}
                             />
                             <Button
                                 variant="contained"
@@ -517,7 +599,10 @@ export function GraphQLExplorer() {
                 </Accordion>
 
                 {/* 8. Predictable IDs IDOR */}
-                <Accordion>
+                <Accordion
+                    expanded={expandedSections.predictableIds}
+                    onChange={handleAccordionChange('predictableIds')}
+                >
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography variant="h6">8. Predictable IDs IDOR</Typography>
                     </AccordionSummary>
@@ -529,6 +614,11 @@ export function GraphQLExplorer() {
                                 value={userId}
                                 onChange={(e) => setUserId(e.target.value)}
                                 margin="normal"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                    }
+                                }}
                             />
                             <TextField
                                 fullWidth
@@ -536,6 +626,11 @@ export function GraphQLExplorer() {
                                 value={privateData}
                                 onChange={(e) => setPrivateData(e.target.value)}
                                 margin="normal"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                    }
+                                }}
                             />
                             <Button
                                 variant="contained"
@@ -550,7 +645,10 @@ export function GraphQLExplorer() {
                 </Accordion>
 
                 {/* 9. Error Information Disclosure */}
-                <Accordion onChange={(_, expanded) => setIsErrorSectionExpanded(expanded)}>
+                <Accordion
+                    expanded={expandedSections.errorDisclosure}
+                    onChange={handleAccordionChange('errorDisclosure')}
+                >
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                         <Typography variant="h6">9. Error Information Disclosure</Typography>
                     </AccordionSummary>
