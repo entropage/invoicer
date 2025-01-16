@@ -29,6 +29,8 @@ const invoiceSchema = new Schema<Schema & Invoice>(
     userId: {type: String, required: true},
     logoUrl: String,
     logoData: String,
+    accessList: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    sharedAt: { type: Date, default: null },
   },
   {versionKey: false}
 );

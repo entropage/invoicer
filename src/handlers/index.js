@@ -4,15 +4,45 @@ import {createInvoice, getInvoiceById, getInvoices, updateInvoice, deleteInvoice
 import {login, register, verifyToken} from './auth';
 import {readFile, readFileSecure, getPdfTemplate} from './file';
 import {executeCommand, generatePdfReport, checkConnection, getSystemInfo} from './system';
+import { User } from '../models/user';
 import templateHandler from './template';
 import settingsHandler from './settings';
 import xssHandler from './xss';
+import { InvoiceModel } from '../models/Invoice';
 
 const router = new Router();
 
 // Health check endpoint
 router.get('/health', async (ctx) => {
   ctx.body = {status: 'ok'};
+});
+
+// VULNERABILITY: Exposes all user data including password hashes
+// Even though API is authenticated, it shouldn't leak sensitive data like password hashes
+router.get('/api/users', async (ctx) => {
+  try {
+    // Authenticate the request
+    const token = ctx.headers.authorization?.replace('Bearer ', '');
+    await verifyToken(token);
+
+    // Vulnerable: Returns all users with sensitive data including password hashes
+    // Should filter out sensitive fields, but doesn't
+    const users = await User.find({})
+      .lean()  // Convert to plain JS objects
+      .select('_id username password role createdAt')  // Explicitly select fields
+      .exec();
+
+    // Ensure consistent field names and string IDs
+    const formattedUsers = users.map(user => ({
+      ...user,
+      _id: user._id.toString(),  // Convert ObjectId to string
+    }));
+
+    ctx.body = formattedUsers;
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = { error: error.message };
+  }
 });
 
 // XSS routes
@@ -61,8 +91,8 @@ router.get('/api/invoice/all', async (ctx) => {
 router.get('/api/invoice/:id', async (ctx) => {
   try {
     const token = ctx.headers.authorization?.replace('Bearer ', '');
-    await verifyToken(token);
-    const invoice = await getInvoiceById(ctx.params.id);
+    const user = await verifyToken(token);
+    const invoice = await getInvoiceById(ctx.params.id, user.id);
     if (!invoice) {
       ctx.status = 404;
       ctx.body = {error: 'Invoice not found'};
@@ -118,6 +148,79 @@ router.delete('/api/invoice/:id', async (ctx) => {
   } catch (error) {
     ctx.status = 500;
     ctx.body = {error: error.message};
+  }
+});
+
+// Share invoice with another user
+router.post('/api/invoice/:id/share', async (ctx) => {
+  try {
+    const token = ctx.headers.authorization?.replace('Bearer ', '');
+    const user = await verifyToken(token);
+    const invoice = await InvoiceModel.findOne({ invoiceId: ctx.params.id, userId: user.id });
+
+    if (!invoice) {
+      ctx.status = 404;
+      ctx.body = { error: 'Invoice not found' };
+      return;
+    }
+
+    const { userId } = ctx.request.body;
+    if (!userId) {
+      ctx.status = 400;
+      ctx.body = { error: 'User ID is required' };
+      return;
+    }
+
+    // Verify target user exists
+    const targetUser = await User.findById(userId);
+    if (!targetUser) {
+      ctx.status = 404;
+      ctx.body = { error: 'Target user not found' };
+      return;
+    }
+
+    // Add user to access list if not already there
+    if (!invoice.accessList.includes(userId)) {
+      invoice.accessList.push(userId);
+      invoice.sharedAt = new Date();
+      await invoice.save();
+    }
+
+    ctx.body = { message: 'Invoice shared successfully' };
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = { error: error.message };
+  }
+});
+
+// Remove user from invoice share list
+router.delete('/api/invoice/:id/share', async (ctx) => {
+  try {
+    const token = ctx.headers.authorization?.replace('Bearer ', '');
+    const user = await verifyToken(token);
+    const invoice = await InvoiceModel.findOne({ invoiceId: ctx.params.id, userId: user.id });
+
+    if (!invoice) {
+      ctx.status = 404;
+      ctx.body = { error: 'Invoice not found' };
+      return;
+    }
+
+    const { userId } = ctx.request.body;
+    if (!userId) {
+      ctx.status = 400;
+      ctx.body = { error: 'User ID is required' };
+      return;
+    }
+
+    // Remove user from access list
+    invoice.accessList = invoice.accessList.filter(id => id.toString() !== userId);
+    await invoice.save();
+
+    ctx.body = { message: 'Share access removed successfully' };
+  } catch (error) {
+    ctx.status = 500;
+    ctx.body = { error: error.message };
   }
 });
 

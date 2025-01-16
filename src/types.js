@@ -20,6 +20,9 @@ export type Invoice = {
   // SSRF Vulnerability: No URL validation on logo URL
   logoUrl?: string,
   logoData?: string,
+  // Sharing fields
+  accessList?: string[],
+  sharedAt?: Date,
 };
 
 export type Person = {

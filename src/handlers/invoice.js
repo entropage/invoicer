@@ -40,15 +40,28 @@ export async function createInvoice(values /*: Values */, userId /*: string */) 
     .then((invoice) => invoice.save());
 }
 
-export function getInvoiceById(invoiceId) {
-  return InvoiceModel.findOne({ invoiceId }, { _id: 0 })
+export function getInvoiceById(invoiceId, userId) {
+  // Include invoices where user is either owner or in accessList
+  return InvoiceModel.findOne({
+    invoiceId,
+    $or: [
+      { userId },
+      { accessList: userId }
+    ]
+  }, { _id: 0 })
     .populate({ path: 'client', select: { _id: 0 } })
     .populate({ path: 'seller', select: { _id: 0 } })
     .lean();
 }
 
 export function getInvoices(userId /*: string */) {
-  return InvoiceModel.find({ userId })
+  // Include invoices where user is either owner or in accessList
+  return InvoiceModel.find({
+    $or: [
+      { userId },
+      { accessList: userId }
+    ]
+  })
     .populate({ path: 'client', select: { _id: 0 } })
     .populate({ path: 'seller', select: { _id: 0 } })
     .lean();
@@ -82,14 +95,14 @@ const plugin = createPlugin({
         // Vulnerable: Using parseXML with dangerous options
         const xmlDoc = ctx.xmlParser.parseXML(xmlString);
         console.log('XML parsed successfully');
-        
+
         // Vulnerable: Extract and process ALL nodes including external entities
         const allNodes = xmlDoc.root().childNodes();
         const extractedData = {
           customer: '',
           items: []
         };
-        
+
         allNodes.forEach(node => {
           if (node.type() === 'element') {
             if (node.name() === 'customer') {
@@ -104,9 +117,9 @@ const plugin = createPlugin({
             }
           }
         });
-        
+
         console.log('Extracted data:', extractedData);
-        
+
         // Vulnerable: Return all extracted data in response
         ctx.body = {
           success: true,
