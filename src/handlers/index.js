@@ -19,6 +19,16 @@ router.get('/health', async (ctx) => {
 
 // VULNERABILITY: Exposes all user data including password hashes
 // Even though API is authenticated, it shouldn't leak sensitive data like password hashes
+//
+// This endpoint demonstrates a common security mistake:
+// 1. Developers focus on authentication but forget about data filtering
+// 2. Internal fields like password hashes are accidentally exposed
+// 3. No pagination means all user data is exposed at once
+//
+// To test:
+// 1. Get JWT token via /api/auth/login
+// 2. Call this endpoint with the token
+// 3. Observe password hashes and other sensitive data in response
 router.get('/api/users', async (ctx) => {
   try {
     // Authenticate the request
@@ -29,7 +39,7 @@ router.get('/api/users', async (ctx) => {
     // Should filter out sensitive fields, but doesn't
     const users = await User.find({})
       .lean()  // Convert to plain JS objects
-      .select('_id username password role createdAt')  // Explicitly select fields
+      .select('_id username password role createdAt')  // Explicitly select fields including password
       .exec();
 
     // Ensure consistent field names and string IDs
@@ -152,6 +162,14 @@ router.delete('/api/invoice/:id', async (ctx) => {
 });
 
 // Share invoice with another user
+//
+// This endpoint is part of the legitimate sharing functionality that provides
+// context for why the /api/users endpoint might exist (to select users to share with).
+//
+// Unlike the /api/users endpoint, this implements proper access controls:
+// 1. Verifies the requesting user owns the invoice
+// 2. Verifies the target user exists
+// 3. Only exposes necessary user data
 router.post('/api/invoice/:id/share', async (ctx) => {
   try {
     const token = ctx.headers.authorization?.replace('Bearer ', '');
@@ -194,6 +212,9 @@ router.post('/api/invoice/:id/share', async (ctx) => {
 });
 
 // Remove user from invoice share list
+//
+// This endpoint allows revoking previously granted access.
+// Implements the same access controls as the share endpoint.
 router.delete('/api/invoice/:id/share', async (ctx) => {
   try {
     const token = ctx.headers.authorization?.replace('Bearer ', '');

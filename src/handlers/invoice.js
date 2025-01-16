@@ -51,6 +51,7 @@ export function getInvoiceById(invoiceId, userId) {
   }, { _id: 0 })
     .populate({ path: 'client', select: { _id: 0 } })
     .populate({ path: 'seller', select: { _id: 0 } })
+    .populate({ path: 'accessList', select: 'username role' })
     .lean();
 }
 
@@ -64,6 +65,7 @@ export function getInvoices(userId /*: string */) {
   })
     .populate({ path: 'client', select: { _id: 0 } })
     .populate({ path: 'seller', select: { _id: 0 } })
+    .populate({ path: 'accessList', select: 'username role' })
     .lean();
 }
 
