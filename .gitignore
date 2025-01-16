@@ -25,3 +25,6 @@ Thumbs.db
 
 # Fusion.js
 .fusion
+
+# Custom
+.well-known/
