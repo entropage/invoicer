@@ -12,17 +12,53 @@ There is no easy rule to tell what is sensitive and what is not. Because it's a 
 - login info is usually the most sensitive data
     - because with it, attacker can control victim's account and do whatever on his/her behave
 
-# plan
-1. Create an new feature that makes sense in this app, which allows user to share invoices
-2. in order for user A to access invoices created by user B, we will do the following:
-    2.1 user A will click on "share" button on an invoice page
-    2.2 front end pop up a list of users of this app
-    2.3 for server to populate the list of the users, it enumerate all info of all users from the database and send the info to frontend
-    2.4 user A check a checkbox in front of user B's username, and click next
-    2.5 server add user B's username into access list of this invoice
-    2.6 user B can now access the invoice
-3. the leakage happens in 2.3
-    3.1 user A can observe the response and realize the json of user B's info includes a token
-    3.2 user A can then login to invoicer with user B's token and use invoicer as user B
+# Enhanced Plan for Sensitive Token Leakage Demo
+
+## Phase 1: Infrastructure Updates
+1. Update User Model:
+   - Add `sessionToken` field (String, required)
+   - Add `lastLogin` field (Date)
+   - Add migration script for existing users
+
+2. Update Invoice Model:
+   - Add `accessList` field (Array of userIds)
+   - Add `sharedAt` field (Date)
+   - Add migration script for existing invoices
+
+## Phase 2: API Implementation
+1. Create new endpoints:
+   - GET `/api/users` - Lists all users (with sensitive token info leaked)
+   - POST `/api/invoices/:id/share` - Add user to invoice access list
+   - DELETE `/api/invoices/:id/share` - Remove user from access list
+
+2. Update existing endpoints:
+   - Modify GET `/api/invoices/:id` to check accessList
+   - Update invoice listing to include shared invoices
+
+## Phase 3: Frontend Changes
+1. Add share button to invoice view
+2. Create share modal with:
+   - User search/selection
+   - Current share status
+   - Share/unshare actions
+
+## Phase 4: Vulnerability Implementation
+1. In GET `/api/users`:
+   - Include full user object including sessionToken
+   - No filtering of sensitive data
+   - No pagination (to ensure all data is sent at once)
+
+2. Frontend will only display:
+   - Username
+   - Role
+   (But token will be in response data)
+
+## Phase 5: Testing
+1. Create test accounts
+2. Verify sharing works
+3. Verify token leakage:
+   - Capture API response
+   - Extract token
+   - Use token to impersonate user
 
 
