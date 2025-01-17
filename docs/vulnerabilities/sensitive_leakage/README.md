@@ -60,18 +60,30 @@ about proper data filtering.
      {
        "_id": "...",
        "username": "user1",
-       "password": "$2a$10$...", // Hashed password leaked!
+       "password": "cGFzc3dvcmQx", // Base64 encoded password!
        "role": "user",
        "createdAt": "..."
      },
      {
        "_id": "...",
        "username": "user2",
-       "password": "$2a$10$...", // Hashed password leaked!
+       "password": "cGFzc3dvcmQy", // Base64 encoded password!
        "role": "user",
        "createdAt": "..."
      }
    ]
+   ```
+
+5. Decode the password and login as another user:
+   ```bash
+   # Decode the password using base64
+   echo "cGFzc3dvcmQy" | base64 -d
+   # Output: password2
+
+   # Login as user2 using the decoded password
+   curl -X POST http://localhost:3000/api/auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"username": "user2", "password": "password2"}'
    ```
 
 ## Using the Web Frontend
@@ -94,15 +106,17 @@ about proper data filtering.
    - Open your browser's developer tools (F12)
    - Go to the Network tab
    - Find the `/api/users` request
-   - Examine the response to see exposed sensitive data including password
-     hashes
+   - Examine the response to see exposed sensitive data
+   - Copy the base64 encoded password
+   - Decode it using browser console: `atob('cGFzc3dvcmQy')`
+   - Use the decoded password to login as that user
 
 ## Security Impact
 
-1. Password Hash Exposure:
-
-   - Leaked password hashes can be used in offline cracking attempts
-   - Common/weak passwords can be recovered despite hashing
+1. Password Exposure:
+   - Passwords are stored using base64 encoding (not hashing)
+   - Base64 encoded passwords can be trivially decoded
+   - No need for password cracking - direct impersonation possible
    - Compromised accounts can be used to access private data
 
 2. User Enumeration:

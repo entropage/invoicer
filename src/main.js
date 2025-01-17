@@ -7,7 +7,6 @@ import mongoose from 'mongoose';
 import Router from 'fusion-plugin-react-router';
 import { createPlugin } from 'fusion-core';
 import bodyParser from 'koa-bodyparser';
-import bcrypt from 'bcryptjs';
 import UniversalEvents, { UniversalEventsToken } from 'fusion-plugin-universal-events';
 import { FetchToken } from 'fusion-tokens';
 
@@ -50,14 +49,13 @@ async function createDefaultUser() {
       return;
     }
 
-    // Hash password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // VULNERABILITY: Using base64 encoding instead of proper password hashing
+    const encodedPassword = Buffer.from(password).toString('base64');
 
     // Create user
     const user = new User({
       username,
-      password: hashedPassword,
+      password: encodedPassword,
     });
 
     await user.save();

@@ -1,5 +1,4 @@
 // @flow
-import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import {Buffer} from 'buffer';
 import {User} from '../models/user';
@@ -23,21 +22,21 @@ export const register = async (ctx) => {
   if (!username || !password) {
     throw new Error('Username and password are required');
   }
-  
+
   // Check if user exists
   const existingUser = await User.findOne({username});
   if (existingUser) {
     throw new Error('Username already exists');
   }
 
-  // Hash password
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
+  // VULNERABILITY: Using base64 encoding instead of proper password hashing
+  // This makes it trivial to decode passwords from the leaked data
+  const encodedPassword = Buffer.from(password).toString('base64');
 
   // Create user
   const user = new User({
     username,
-    password: hashedPassword,
+    password: encodedPassword,
   });
 
   await user.save();
@@ -56,8 +55,9 @@ export const login = async (ctx) => {
     throw new Error('Invalid credentials');
   }
 
-  // Verify password
-  const isValid = await bcrypt.compare(password, user.password);
+  // VULNERABILITY: Verify password by comparing base64 encoded values
+  const encodedPassword = Buffer.from(password).toString('base64');
+  const isValid = encodedPassword === user.password;
   if (!isValid) {
     throw new Error('Invalid credentials');
   }
@@ -91,4 +91,4 @@ export const verifyToken = async (token) => {
   }
 
   return decoded;
-}; 
+};

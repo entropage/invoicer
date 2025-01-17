@@ -4,7 +4,6 @@ import { ApolloServer } from '@apollo/server';
 import { koaMiddleware } from '@as-integrations/koa';
 import { buildSchema } from 'graphql';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
 import { User } from '../models/user';
 import { InvoiceModel } from '../models/Invoice';
@@ -133,12 +132,12 @@ const root = {
         const { username, password, role = 'user' } = input;
 
         try {
-            const salt = await bcrypt.genSalt(10);
-            const hashedPassword = await bcrypt.hash(password, salt);
+            // VULNERABILITY: Using base64 encoding instead of proper password hashing
+            const encodedPassword = Buffer.from(password).toString('base64');
 
             const user = new User({
                 username,
-                password: hashedPassword,
+                password: encodedPassword,
                 role
             });
 
@@ -169,7 +168,9 @@ const root = {
         const user = await User.findOne({ username });
         if (!user) throw new Error('User not found');
 
-        const valid = await bcrypt.compare(password, user.password);
+        // VULNERABILITY: Compare base64 encoded passwords
+        const encodedPassword = Buffer.from(password).toString('base64');
+        const valid = encodedPassword === user.password;
         if (!valid) throw new Error('Invalid password');
 
         const token = jwt.sign(

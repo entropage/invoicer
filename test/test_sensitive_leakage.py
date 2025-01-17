@@ -1,9 +1,9 @@
+import base64
 import os
 import subprocess
 import time
 from datetime import datetime
 
-import bcrypt
 import jwt
 import pytest
 import requests
@@ -62,15 +62,14 @@ def test_users():
     # Create test users
     users = db.users
     password = "test123"
-    salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(password.encode(), salt)
-    hashed_str = hashed.decode()
+    # VULNERABILITY: Using base64 encoding instead of proper hashing
+    encoded_password = base64.b64encode(password.encode()).decode()
 
     # Create users with consistent field names
     user1 = users.insert_one(
         {
             "username": "user1",
-            "password": hashed_str,
+            "password": encoded_password,
             "role": "user",
             "createdAt": datetime.utcnow(),
         }
@@ -79,13 +78,13 @@ def test_users():
     user2 = users.insert_one(
         {
             "username": "user2",
-            "password": hashed_str,
+            "password": encoded_password,
             "role": "user",
             "createdAt": datetime.utcnow(),
         }
     )
 
-    user_ids = [str(user1.inserted_id), str(user2.inserted_id), hashed_str]
+    user_ids = [str(user1.inserted_id), str(user2.inserted_id), encoded_password]
 
     # Close connection
     client.close()
