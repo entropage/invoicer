@@ -22,6 +22,13 @@ about proper data filtering.
 2. Invoice Sharing Feature:
    - Used to demonstrate legitimate user data access
    - Provides context for why a user listing endpoint might exist
+   - Implemented through two endpoints:
+     - `POST /api/invoice/:id/share`: Add user to invoice access list
+     - `DELETE /api/invoice/:id/share`: Remove user from access list
+   - Both endpoints implement proper access controls:
+     - Verify requesting user owns the invoice
+     - Verify target user exists
+     - Only expose necessary user data
 
 ## How to Test
 
@@ -55,6 +62,7 @@ about proper data filtering.
    ```
 
 4. Observe the response includes sensitive data:
+
    ```json
    [
      {
@@ -75,6 +83,7 @@ about proper data filtering.
    ```
 
 5. Decode the password and login as another user:
+
    ```bash
    # Decode the password using base64
    echo "cGFzc3dvcmQy" | base64 -d
@@ -84,6 +93,46 @@ about proper data filtering.
    curl -X POST http://localhost:3000/api/auth/login \
      -H "Content-Type: application/json" \
      -d '{"username": "user2", "password": "password2"}'
+   ```
+
+## Testing Invoice Sharing
+
+1. Create an invoice as user1:
+
+   ```bash
+   curl -X POST http://localhost:3000/api/invoice \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer <user1-token>" \
+     -d '{
+       "invoice": {
+         "invoiceId": "INV-001",
+         "items": [{"description": "Test", "quantity": 1, "unitPrice": 100}]
+       }
+     }'
+   ```
+
+2. Share the invoice with user2:
+
+   ```bash
+   curl -X POST http://localhost:3000/api/invoice/INV-001/share \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer <user1-token>" \
+     -d '{"userId": "<user2-id>"}'
+   ```
+
+3. Verify user2 can access the shared invoice:
+
+   ```bash
+   curl http://localhost:3000/api/invoice/INV-001 \
+     -H "Authorization: Bearer <user2-token>"
+   ```
+
+4. Remove user2's access:
+   ```bash
+   curl -X DELETE http://localhost:3000/api/invoice/INV-001/share \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer <user1-token>" \
+     -d '{"userId": "<user2-id>"}'
    ```
 
 ## Using the Web Frontend
@@ -114,6 +163,7 @@ about proper data filtering.
 ## Security Impact
 
 1. Password Exposure:
+
    - Passwords are stored using base64 encoding (not hashing)
    - Base64 encoded passwords can be trivially decoded
    - No need for password cracking - direct impersonation possible
