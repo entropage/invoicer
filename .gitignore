@@ -27,3 +27,5 @@ Thumbs.db
 
 # Custom
 .well-known/
+.specstory/
+POCs/

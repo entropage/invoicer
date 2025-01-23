@@ -1,0 +1,678 @@
+[
+  {
+    "ruleId": "javascript_express_hardcoded_secret",
+    "method": "",
+    "source": "src/handlers/auth.js:66:17-30",
+    "sink": "src/handlers/auth.js:66:17-30",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/login",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_express_hardcoded_secret",
+    "method": "",
+    "source": "src/handlers/graphql.js:146:27-14",
+    "sink": "src/handlers/graphql.js:146:27-14",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_express_hardcoded_secret",
+    "method": "",
+    "source": "src/handlers/graphql.js:176:23-10",
+    "sink": "src/handlers/graphql.js:176:23-10",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_express_hardcoded_secret",
+    "method": "",
+    "source": "src/plugins/jwt.js:18:14-56",
+    "sink": "src/plugins/jwt.js:18:14-56",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_dynamic_os_command",
+    "method": "",
+    "source": "src/handlers/system.js:14:38-58",
+    "sink": "src/handlers/system.js:14:38-58",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_dynamic_os_command",
+    "method": "",
+    "source": "src/handlers/system.js:31:5-22",
+    "sink": "src/handlers/system.js:31:5-22",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_dynamic_os_command",
+    "method": "",
+    "source": "src/handlers/system.js:46:20-37",
+    "sink": "src/handlers/system.js:46:20-37",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_dynamic_os_command",
+    "method": "",
+    "source": "src/handlers/system.js:75:20-37",
+    "sink": "src/handlers/system.js:75:20-37",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "GET",
+      "route": "/api/system/info",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_hardcoded_secret",
+    "method": "",
+    "source": "src/containers/GraphQLExplorer/GraphQLExplorer.js:263:21-40",
+    "sink": "src/containers/GraphQLExplorer/GraphQLExplorer.js:263:21-40",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_hardcoded_secret",
+    "method": "",
+    "source": "src/handlers/auth.js:12:1-47",
+    "sink": "src/handlers/auth.js:12:1-47",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_hardcoded_secret",
+    "method": "",
+    "source": "src/handlers/graphql.js:122:1-47",
+    "sink": "src/handlers/graphql.js:122:1-47",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_hardcoded_secret",
+    "method": "",
+    "source": "src/main.js:43:5-32",
+    "sink": "src/main.js:43:5-32",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_hardcoded_secret",
+    "method": "",
+    "source": "src/plugins/jwt.js:6:1-47",
+    "sink": "src/plugins/jwt.js:6:1-47",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_jwt_hardcoded_secret",
+    "method": "",
+    "source": "src/handlers/auth.js:66:17-30",
+    "sink": "src/handlers/auth.js:66:17-30",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_jwt_hardcoded_secret",
+    "method": "",
+    "source": "src/handlers/graphql.js:146:27-14",
+    "sink": "src/handlers/graphql.js:146:27-14",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_jwt_hardcoded_secret",
+    "method": "",
+    "source": "src/handlers/graphql.js:176:23-10",
+    "sink": "src/handlers/graphql.js:176:23-10",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_jwt_hardcoded_secret",
+    "method": "",
+    "source": "src/plugins/jwt.js:18:14-56",
+    "sink": "src/plugins/jwt.js:18:14-56",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_express_cross_site_scripting",
+    "method": "",
+    "source": "docs/vulnerabilities/SSTI/BlakeembreyTemplate_1_1_0.ts:43:5-23",
+    "sink": "docs/vulnerabilities/SSTI/BlakeembreyTemplate_1_1_0.ts:43:5-23",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_dangerous_insert_html",
+    "method": "",
+    "source": "src/components/XssDemo.js:29:13-47",
+    "sink": "src/components/XssDemo.js:29:13-47",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_dangerous_insert_html",
+    "method": "",
+    "source": "src/components/XssDemo.js:58:9-43",
+    "sink": "src/components/XssDemo.js:58:9-43",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_jwt",
+    "method": "",
+    "source": "src/handlers/auth.js:66:17-30",
+    "sink": "src/handlers/auth.js:66:17-30",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_jwt",
+    "method": "",
+    "source": "src/handlers/graphql.js:146:27-14",
+    "sink": "src/handlers/graphql.js:146:27-14",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_jwt",
+    "method": "",
+    "source": "src/handlers/graphql.js:176:23-10",
+    "sink": "src/handlers/graphql.js:176:23-10",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_path_traversal",
+    "method": "",
+    "source": "src/handlers/file.js:9:20-59",
+    "sink": "src/handlers/file.js:9:20-59",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_path_traversal",
+    "method": "",
+    "source": "src/handlers/file.js:27:22-52",
+    "sink": "src/handlers/file.js:27:22-52",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_path_traversal",
+    "method": "",
+    "source": "src/handlers/file.js:41:24-74",
+    "sink": "src/handlers/file.js:41:24-74",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_react_dangerously_set_inner_html",
+    "method": "",
+    "source": "src/components/EditableText/EditableText.js:33:32-64",
+    "sink": "src/components/EditableText/EditableText.js:33:32-64",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_react_dangerously_set_inner_html",
+    "method": "",
+    "source": "src/components/XssDemo.js:156:63-84",
+    "sink": "src/components/XssDemo.js:156:63-84",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_insufficiently_random_values",
+    "method": "",
+    "source": "src/utils/index.js:23:16-29",
+    "sink": "src/utils/index.js:23:16-29",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/containers/GraphQLExplorer/GraphQLExplorer.js:190:9-57",
+    "sink": "src/containers/GraphQLExplorer/GraphQLExplorer.js:190:9-57",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/containers/GraphQLExplorer/GraphQLExplorer.js:200:13-69",
+    "sink": "src/containers/GraphQLExplorer/GraphQLExplorer.js:200:13-69",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/containers/GraphQLExplorer/GraphQLExplorer.js:203:13-75",
+    "sink": "src/containers/GraphQLExplorer/GraphQLExplorer.js:203:13-75",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/handlers/graphql.js:162:13-56",
+    "sink": "src/handlers/graphql.js:162:13-56",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/handlers/graphql.js:239:13-71",
+    "sink": "src/handlers/graphql.js:239:13-71",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/handlers/graphql.js:277:13-71",
+    "sink": "src/handlers/graphql.js:277:13-71",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/handlers/graphql.js:325:13-50",
+    "sink": "src/handlers/graphql.js:325:13-50",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/handlers/graphql.js:426:21-56",
+    "sink": "src/handlers/graphql.js:426:21-56",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/handlers/invoice.js:91:9-46",
+    "sink": "src/handlers/invoice.js:91:9-46",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/handlers/invoice.js:123:9-54",
+    "sink": "src/handlers/invoice.js:123:9-54",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/handlers/invoice.js:137:9-51",
+    "sink": "src/handlers/invoice.js:137:9-51",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/handlers/settings.js:101:13-60",
+    "sink": "src/handlers/settings.js:101:13-60",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/handlers/settings.js:113:13-55",
+    "sink": "src/handlers/settings.js:113:13-55",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/handlers/system.js:9:3-35",
+    "sink": "src/handlers/system.js:9:3-35",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/handlers/system.js:15:5-43",
+    "sink": "src/handlers/system.js:15:5-43",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/handlers/system.js:18:5-54",
+    "sink": "src/handlers/system.js:18:5-54",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/main.js:64:5-57",
+    "sink": "src/main.js:64:5-57",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/main.js:94:9-56",
+    "sink": "src/main.js:94:9-56",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/plugins/apollo.js:38:21-22",
+    "sink": "src/plugins/apollo.js:38:21-22",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/plugins/apollo.js:44:17-66",
+    "sink": "src/plugins/apollo.js:44:17-66",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/plugins/apollo.js:50:17-19",
+    "sink": "src/plugins/apollo.js:50:17-19",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/plugins/apollo.js:55:21-23",
+    "sink": "src/plugins/apollo.js:55:21-23",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/plugins/xml-parser.js:10:9-47",
+    "sink": "src/plugins/xml-parser.js:10:9-47",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/plugins/xml-parser.js:35:9-61",
+    "sink": "src/plugins/xml-parser.js:35:9-61",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/plugins/xml-parser.js:57:5-57",
+    "sink": "src/plugins/xml-parser.js:57:5-57",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/plugins/xml-parser.js:58:5-70",
+    "sink": "src/plugins/xml-parser.js:58:5-70",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/plugins/xml-parser.js:70:9-50",
+    "sink": "src/plugins/xml-parser.js:70:9-50",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/plugins/xml-parser.js:72:9-56",
+    "sink": "src/plugins/xml-parser.js:72:9-56",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "GET",
+      "route": "/api/system/info",
+      "parameter": ""
+    }
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/plugins/xml-parser.js:86:7-9",
+    "sink": "src/plugins/xml-parser.js:86:7-9",
+    "path": [
+      ""
+    ]
+  },
+  {
+    "ruleId": "javascript_lang_logger_leak",
+    "method": "",
+    "source": "src/utils/logger.js:25:3-26",
+    "sink": "src/utils/logger.js:25:3-26",
+    "path": [
+      ""
+    ],
+    "apiEntry": {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "parameter": ""
+    }
+  }
+]
