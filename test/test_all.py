@@ -16,10 +16,10 @@ from test.test_command_injection import (
 from test.test_idor import test_idor
 from test.test_invoicer_jwt import JWTVulnerabilityTest
 from test.test_path_traversal import PathTraversalTest
-from test.test_ssrf import SSRFTest
 from test.vulnerabilities.deserialization.test_deserialization import (
     DeserializationTest,
 )
+from test.vulnerabilities.ssrf.test_ssrf import SSRFTest
 
 
 def create_test_suite():
