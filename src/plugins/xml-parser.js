@@ -1,6 +1,6 @@
 // @flow
 import { createPlugin } from 'fusion-core';
-import { XMLParser, XMLBuilder } from 'fast-xml-parser';
+import libxmljs from 'libxmljs';
 import getRawBody from 'raw-body';
 
 export default createPlugin({
@@ -8,23 +8,16 @@ export default createPlugin({
     return {
       parseXML: (xmlString) => {
         console.log('Parsing XML:', xmlString); // Debug log
-        // Vulnerable configuration: Enable entity expansion and network access
-        const options = {
-          ignoreAttributes: false,
-          allowBooleanAttributes: true,
-          parseAttributeValue: true,
-          parseTagValue: true,
-          trimValues: true,
-          // Intentionally vulnerable configurations for educational purposes
-          allowDTD: true, // Enable DTD processing
-          validateXML: false, // Disable XML validation
-          processEntities: true, // Enable entity processing
-          stopNodes: [], // Process all nodes
-          htmlEntities: true, // Enable HTML entities
-        };
-
-        const parser = new XMLParser(options);
-        return parser.parse(xmlString);
+        try {
+          return libxmljs.parseXml(xmlString, {
+            noent: true,    // 允许实体替换
+            nonet: false,   // 允许网络访问
+            dtdload: true   // 允许加载外部DTD
+          });
+        } catch (error) {
+          console.error('XML parsing error:', error);
+          throw error;
+        }
       }
     };
   },
@@ -33,23 +26,16 @@ export default createPlugin({
     ctx.xmlParser = {
       parseXML: (xmlString) => {
         console.log('Parsing XML in middleware:', xmlString); // Debug log
-        // Vulnerable configuration: Enable entity expansion and network access
-        const options = {
-          ignoreAttributes: false,
-          allowBooleanAttributes: true,
-          parseAttributeValue: true,
-          parseTagValue: true,
-          trimValues: true,
-          // Intentionally vulnerable configurations for educational purposes
-          allowDTD: true, // Enable DTD processing
-          validateXML: false, // Disable XML validation
-          processEntities: true, // Enable entity processing
-          stopNodes: [], // Process all nodes
-          htmlEntities: true, // Enable HTML entities
-        };
-
-        const parser = new XMLParser(options);
-        return parser.parse(xmlString);
+        try {
+          return libxmljs.parseXml(xmlString, {
+            noent: true,    // 允许实体替换
+            nonet: false,   // 允许网络访问
+            dtdload: true   // 允许加载外部DTD
+          });
+        } catch (error) {
+          console.error('XML parsing error:', error);
+          throw error;
+        }
       }
     };
 
@@ -90,3 +76,56 @@ export default createPlugin({
     }
   }
 });
+
+// Helper function to convert libxmljs document to JSON-like structure
+function convertXmlToJson(doc) {
+  const root = doc.root();
+  if (!root) {
+    return null;
+  }
+  return nodeToJson(root);
+}
+
+function nodeToJson(node) {
+  const result = {};
+  
+  // Handle text content
+  const text = node.text().trim();
+  if (text) {
+    result['#text'] = text;
+  }
+  
+  // Handle attributes
+  const attrs = node.attrs();
+  if (attrs.length > 0) {
+    result['@'] = {};
+    attrs.forEach(attr => {
+      result['@'][attr.name()] = attr.value();
+    });
+  }
+
+  // Handle child nodes
+  const children = node.childNodes();
+  children.forEach(child => {
+    if (child.type() === 'element') {
+      const childName = child.name();
+      const childValue = nodeToJson(child);
+      
+      if (result[childName]) {
+        if (!Array.isArray(result[childName])) {
+          result[childName] = [result[childName]];
+        }
+        result[childName].push(childValue);
+      } else {
+        result[childName] = childValue;
+      }
+    }
+  });
+
+  // If only text content exists, return it directly
+  if (Object.keys(result).length === 1 && result['#text']) {
+    return result['#text'];
+  }
+
+  return result;
+}
